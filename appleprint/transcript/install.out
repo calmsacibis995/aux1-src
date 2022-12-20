@@ -1,0 +1,169 @@
+	. ./config; mv /u/tins/usr/lib/ps /u/tins/usr/lib/ps.old
+	. ./config; mkdir /u/tins/usr/lib/ps; chown $OWNER /u/tins/usr/lib/ps; \
+		chgrp $GROUP /u/tins/usr/lib/ps; chmod 755 /u/tins/usr/lib/ps
+	. ./config; cd src; make  ROOT=/u/tins install 
+	strip map psbanner pscomm psrv pstext enscript ps4014 ps630 pscat pscatmap psdit psplot psrev
+	cd /u/tins/usr/lib/ps; rm -f map psbanner pscomm psrv pstext enscript ps4014 ps630 pscat pscatmap psdit psplot psrev
+	cd /u/tins/usr/bin; rm -f enscript ps4014 ps630 pscat pscatmap psdit psplot psrev
+	cp enscript ps4014 ps630 pscat pscatmap psdit psplot psrev /u/tins/usr/bin
+	cd /u/tins/usr/bin; chown $OWNER enscript ps4014 ps630 pscat pscatmap psdit psplot psrev; chgrp $GROUP enscript ps4014 ps630 pscat pscatmap psdit psplot psrev; \
+		chmod 755 enscript ps4014 ps630 pscat pscatmap psdit psplot psrev
+	cp map psbanner pscomm psrv pstext /u/tins/usr/lib/ps
+	cd /u/tins/usr/lib/ps; chown $OWNER map psbanner pscomm psrv pstext; chgrp $GROUP map psbanner pscomm psrv pstext; \
+		chmod 755 map psbanner pscomm psrv pstext
+	cd /u/tins/usr/bin ; $LINK enscript ps4014 ps630 pscat pscatmap psdit psplot psrev /u/tins/usr/lib/ps
+	. ./config; cd sh;  make  ROOT=/u/tins install
+	cp ptroff psroff /u/tins/usr/bin
+	chown $OWNER /u/tins/usr/bin/ptroff /u/tins/usr/bin/psroff
+	chgrp $GROUP /u/tins/usr/bin/ptroff /u/tins/usr/bin/psroff
+	chmod 755 /u/tins/usr/bin/ptroff /u/tins/usr/bin/psroff
+	. ./config; cd lib; make  ROOT=/u/tins install
+	cd /u/tins/usr/lib/ps; rm -rf - banner.pro enscript.pro pstext.pro  ps4014.pro ps630.pro ps4014.pro pscat.pro psplot.pro psdit.pro  ehandler.ps uartpatch.ps bogusmsg.ps  font.map *.afm
+	cp banner.pro enscript.pro pstext.pro  ps4014.pro ps630.pro ps4014.pro pscat.pro psplot.pro psdit.pro  ehandler.ps uartpatch.ps bogusmsg.ps  font.map *.afm /u/tins/usr/lib/ps
+	cd /u/tins/usr/lib/ps; chown $OWNER banner.pro enscript.pro pstext.pro  ps4014.pro ps630.pro ps4014.pro pscat.pro psplot.pro psdit.pro  ehandler.ps uartpatch.ps bogusmsg.ps  font.map *.afm; \
+		chgrp $GROUP banner.pro enscript.pro pstext.pro  ps4014.pro ps630.pro ps4014.pro pscat.pro psplot.pro psdit.pro  ehandler.ps uartpatch.ps bogusmsg.ps  font.map *.afm; chmod 644 banner.pro enscript.pro pstext.pro  ps4014.pro ps630.pro ps4014.pro pscat.pro psplot.pro psdit.pro  ehandler.ps uartpatch.ps bogusmsg.ps  font.map *.afm
+	rm -rf /u/tins/usr/lib/ps/troff.font /u/tins/usr/lib/ps/ditroff.font
+	mkdir /u/tins/usr/lib/ps/troff.font /u/tins/usr/lib/ps/ditroff.font
+	cp troff.font/* /u/tins/usr/lib/ps/troff.font
+	cd /u/tins/usr/lib/ps/troff.font; make  ROOT=/u/tins install 
+	../pscatmap Times.map
+	awk -f head.awk Times.map >Times.head
+	../pscatmap Helvetica.map
+	awk -f head.awk Helvetica.map >Helvetica.head
+	mkdir /u/tins/usr/lib/font/ps
+mkdir: /u/tins/usr/lib/font/ps: File exists
+*** Error code 1 (ignored)
+	cp ft* *.ct *.head /u/tins/usr/lib/font/ps
+	cd /u/tins/usr/lib/font/ps ; chown $OWNER . * ; chgrp $GROUP . * ; \
+		chmod 755 . ; chmod 644 * ; 
+	cd /u/tins/usr/lib/ps/troff.font; chown $OWNER . * ; chgrp $GROUP . *
+	cp ditroff.font/* /u/tins/usr/lib/ps/ditroff.font
+	cd /u/tins/usr/lib/ps/ditroff.font; make ROOT=/u/tins  install
+	test -r "$MAKEDEV"
+	rm -f DESC
+	echo "# ditroff device description for PostScript" >> DESC
+	echo "# PostScript is a trademark of Adobe Systems Incorporated">>DESC
+	echo R I B BI H HB C CB S SS | awk '{print "fonts", NF, $0}' >> DESC
+	cat devspecs >>DESC
+	echo "charset" >> DESC
+	cat charset >> DESC
+	make  R.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit R ..
+	touch R.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  I.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit I ..
+	touch I.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  B.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit B ..
+	touch B.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  BI.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit BI ..
+	touch BI.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  H.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit H ..
+	touch H.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  HB.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit HB ..
+	touch HB.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  C.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit C ..
+	touch C.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  CB.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit CB ..
+	touch CB.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  S.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit S ..
+	touch S.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  SS.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit SS ..
+	touch SS.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	rm -f HO.font
+	make  HO.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit HO ..
+	touch HO.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	rm -f HD.font
+	make  HD.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit HD ..
+	touch HD.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	rm -f CO.font
+	make  CO.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit CO ..
+	touch CO.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	rm -f CD.font
+	make  CD.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit CD ..
+	touch CD.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	$MAKEDEV HO HD CO CD
+ HO: 147 chars, width  56, size 767
+ HD: 147 chars, width  56, size 767
+ CO: 140 chars, width 120, size 746
+ CD: 140 chars, width 120, size 746
+	$MAKEDEV DESC
+  R: 147 chars, width  50, size 767
+  I: 147 chars, width  50, size 767
+  B: 147 chars, width  50, size 767
+ BI: 147 chars, width  50, size 767
+  H: 147 chars, width  56, size 767
+ HB: 147 chars, width  56, size 767
+  C: 140 chars, width 120, size 746
+ CB: 140 chars, width 120, size 746
+  S: 143 chars, width  50, size 755
+ SS:  25 chars, width 100, size 401
+	rm -rf /u/tins/usr/lib/font/devpsc
+	mkdir /u/tins/usr/lib/font/devpsc
+	cp *.aux *.map *.out DESC /u/tins/usr/lib/font/devpsc
+	cd /u/tins/usr/lib/font/devpsc ; chown $OWNER . * ; chgrp $GROUP . * ; \
+		chmod 755 . ; chmod 644 *.aux *.map *.out DESC
+	cd /u/tins/usr/lib/ps/ditroff.font; chown $OWNER . * ; chgrp $GROUP . *
+	. ./config; cd man; make  ROOT=/u/tins install
+	cd ; rm -f enscript.1 ps4014.1 ps630.1 pscat.1 psdit.1 psplot.1 psrev.1  psroff.1 ptroff.1 afm.7 postscript.7 pscatmap.8 transcript.8
+	./installman 1 $MAN1
+sh: ./installman: cannot execute
+*** Error code 1
+
+Stop.
+*** Error code 1
+
+Stop.

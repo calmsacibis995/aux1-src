@@ -1,0 +1,224 @@
+Thu Jun 25 13:03:40 PDT 1987
+	. ./config; mv /usr/lib/ps /usr/lib/ps.old
+	. ./config; mkdir /usr/lib/ps; chown $OWNER /usr/lib/ps; \
+		chgrp $GROUP /usr/lib/ps; chmod 755 /usr/lib/ps
+	. ./config; cd src; make  ROOT= install 
+	cc -O -DSYSV -n -c map.c
+	cc -O -DSYSV -n -c mapname.c
+	cc -O -DSYSV -n -c psutil.c
+	rm -f - config.c
+	sed	-e s,PSLIBDIR,$PSLIBDIR,g \
+		-e s,TROFFFONTDIR,$TROFFFONTDIR,g \
+		-e s,DITDIR,$DITDIR,g \
+		-e s,PSTEMPDIR,$PSTEMPDIR,g \
+		config.proto >config.c
+	cc -O -DSYSV -n -c config.c
+	cc -O -DSYSV -n -o map map.o mapname.o psutil.o config.o
+	cc -O -DSYSV -n -c psbanner.c
+	cc -O -DSYSV -n -o psbanner psbanner.o psutil.o config.o
+	cc -O -DSYSV -n -c pscomm.c
+	cc -O -DSYSV -n -o pscomm pscomm.o psutil.o config.o
+	cc -O -DSYSV -n -c psrv.c
+	cc -O -DSYSV -n -o psrv psrv.o psutil.o config.o
+	cc -O -DSYSV -n -c pstext.c
+	cc -O -DSYSV -n -o pstext pstext.o psutil.o config.o
+	cc -O -DSYSV -n -c enscript.c
+	cc -O -DSYSV -n -o enscript enscript.o psutil.o mapname.o config.o
+	cc -O -DSYSV -n -c ps4014.c
+	cc -O -DSYSV -n -o ps4014 ps4014.o psutil.o config.o
+	cc -O -DSYSV -n -c ps630.c
+	cc -O -DSYSV -n -o ps630 ps630.o psutil.o config.o
+	cc -O -DSYSV -n -c pscat.c
+	cc -O -DSYSV -n -o pscat pscat.o psutil.o config.o 
+	cc -O -DSYSV -n -c pscatmap.c
+	cc -O -DSYSV -n -o pscatmap pscatmap.o psutil.o config.o mapname.o
+	cc -O -DSYSV -n -c psdit.c
+	cc -O -DSYSV -n -o psdit psdit.o psutil.o config.o 
+	cc -O -DSYSV -n -c psplot.c
+	cc -O -DSYSV -n -o psplot psplot.o psutil.o config.o
+	cc -O -DSYSV -n -c psrev.c
+	cc -O -DSYSV -n -o psrev psrev.o psutil.o config.o
+	strip map psbanner pscomm psrv pstext enscript ps4014 ps630 pscat pscatmap psdit psplot psrev
+	cd /usr/lib/ps; rm -f map psbanner pscomm psrv pstext enscript ps4014 ps630 pscat pscatmap psdit psplot psrev
+	cd /usr/bin; rm -f enscript ps4014 ps630 pscat pscatmap psdit psplot psrev
+	cp enscript ps4014 ps630 pscat pscatmap psdit psplot psrev /usr/bin
+	cd /usr/bin; chown $OWNER enscript ps4014 ps630 pscat pscatmap psdit psplot psrev; chgrp $GROUP enscript ps4014 ps630 pscat pscatmap psdit psplot psrev; \
+		chmod 755 enscript ps4014 ps630 pscat pscatmap psdit psplot psrev
+	cp map psbanner pscomm psrv pstext /usr/lib/ps
+	cd /usr/lib/ps; chown $OWNER map psbanner pscomm psrv pstext; chgrp $GROUP map psbanner pscomm psrv pstext; \
+		chmod 755 map psbanner pscomm psrv pstext
+	cd /usr/bin ; $LINK enscript ps4014 ps630 pscat pscatmap psdit psplot psrev /usr/lib/ps
+	. ./config; cd sh;  make  ROOT= install
+	cp psroff.sh psroff
+	sed	-e s,TROFFFONTDIR,$TROFFFONTDIR,g \
+		ptroff.sh >ptroff
+	cp ptroff psroff /usr/bin
+	chown $OWNER /usr/bin/ptroff /usr/bin/psroff
+	chgrp $GROUP /usr/bin/ptroff /usr/bin/psroff
+	chmod 755 /usr/bin/ptroff /usr/bin/psroff
+	. ./config; cd lib; make  ROOT= install
+	cd /usr/lib/ps; rm -rf - banner.pro enscript.pro pstext.pro  ps4014.pro ps630.pro ps4014.pro pscat.pro psplot.pro psdit.pro  ehandler.ps uartpatch.ps bogusmsg.ps  font.map *.afm
+	cp banner.pro enscript.pro pstext.pro  ps4014.pro ps630.pro ps4014.pro pscat.pro psplot.pro psdit.pro  ehandler.ps uartpatch.ps bogusmsg.ps  font.map *.afm /usr/lib/ps
+	cd /usr/lib/ps; chown $OWNER banner.pro enscript.pro pstext.pro  ps4014.pro ps630.pro ps4014.pro pscat.pro psplot.pro psdit.pro  ehandler.ps uartpatch.ps bogusmsg.ps  font.map *.afm; \
+		chgrp $GROUP banner.pro enscript.pro pstext.pro  ps4014.pro ps630.pro ps4014.pro pscat.pro psplot.pro psdit.pro  ehandler.ps uartpatch.ps bogusmsg.ps  font.map *.afm; chmod 644 banner.pro enscript.pro pstext.pro  ps4014.pro ps630.pro ps4014.pro pscat.pro psplot.pro psdit.pro  ehandler.ps uartpatch.ps bogusmsg.ps  font.map *.afm
+	rm -rf /usr/lib/ps/troff.font /usr/lib/ps/ditroff.font
+	mkdir /usr/lib/ps/troff.font /usr/lib/ps/ditroff.font
+	cp troff.font/Helvetica.map /usr/lib/ps/troff.font/
+	cp troff.font/Makefile.bsd /usr/lib/ps/troff.font/
+	cp troff.font/doto.awk /usr/lib/ps/troff.font/
+	cp troff.font/Makefile /usr/lib/ps/troff.font/
+	cp troff.font/Times.map /usr/lib/ps/troff.font/
+	cp troff.font/head.awk /usr/lib/ps/troff.font/
+	cd /usr/lib/ps/troff.font; make  ROOT= install 
+	../pscatmap Times.map
+	awk -f head.awk Times.map >Times.head
+	../pscatmap Helvetica.map
+	awk -f head.awk Helvetica.map >Helvetica.head
+	mkdir /usr/lib/font/ps
+mkdir: /usr/lib/font/ps: File exists
+*** Error code 1 (ignored)
+	cp ft* *.ct *.head /usr/lib/font/ps
+	cd /usr/lib/font/ps ; chown $OWNER . * ; chgrp $GROUP . * ; \
+		chmod 755 . ; chmod 644 * ; 
+	cd /usr/lib/ps/troff.font; chown $OWNER . * ; chgrp $GROUP . *
+	cp ditroff.font/B.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/CD.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/HD.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/R.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/SS.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/devspecs /usr/lib/ps/ditroff.font/
+	cp ditroff.font/BI.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/CO.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/HO.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/README /usr/lib/ps/ditroff.font/
+	cp ditroff.font/afmdit /usr/lib/ps/ditroff.font/
+	cp ditroff.font/C.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/H.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/I.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/S.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/afmdit.bsd /usr/lib/ps/ditroff.font/
+	cp ditroff.font/afmdit.awk /usr/lib/ps/ditroff.font/
+	cp ditroff.font/CB.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/HB.map /usr/lib/ps/ditroff.font/
+	cp ditroff.font/Makefile /usr/lib/ps/ditroff.font/
+	cp ditroff.font/charset /usr/lib/ps/ditroff.font/
+	cd /usr/lib/ps/ditroff.font; make ROOT=  install
+	test -r "$MAKEDEV"
+	rm -f DESC
+	echo "# ditroff device description for PostScript" >> DESC
+	echo "# PostScript is a trademark of Adobe Systems Incorporated">>DESC
+	echo R I B BI H HB C CB S SS | awk '{print "fonts", NF, $0}' >> DESC
+	cat devspecs >>DESC
+	echo "charset" >> DESC
+	cat charset >> DESC
+	make  R.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit R ..
+	touch R.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  I.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit I ..
+	touch I.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  B.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit B ..
+	touch B.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  BI.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit BI ..
+	touch BI.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  H.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit H ..
+	touch H.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  HB.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit HB ..
+	touch HB.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  C.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit C ..
+	touch C.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  CB.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit CB ..
+	touch CB.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  S.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit S ..
+	touch S.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	make  SS.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit SS ..
+	touch SS.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	rm -f HO.font
+	make  HO.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit HO ..
+	touch HO.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	rm -f HD.font
+	make  HD.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit HD ..
+	touch HD.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	rm -f CO.font
+	make  CO.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit CO ..
+	touch CO.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	rm -f CD.font
+	make  CD.font
+	/bin/rm -f - temp.header temp.spaces temp.trailer temp.aux
+	chmod +x ./afmdit
+	./afmdit CD ..
+	touch CD.font
+	/bin/rm -f -  temp.header temp.spaces temp.trailer temp.aux
+	$MAKEDEV HO HD CO CD
+ HO: 147 chars, width  56, size 768
+ HD: 147 chars, width  56, size 768
+ CO: 140 chars, width 120, size 747
+ CD: 140 chars, width 120, size 747
+	$MAKEDEV DESC
+  R: 147 chars, width  50, size 768
+  I: 147 chars, width  50, size 768
+  B: 147 chars, width  50, size 768
+ BI: 147 chars, width  50, size 768
+  H: 147 chars, width  56, size 768
+ HB: 147 chars, width  56, size 768
+  C: 140 chars, width 120, size 747
+ CB: 140 chars, width 120, size 747
+  S: 144 chars, width  50, size 759
+ SS:  25 chars, width 100, size 402
+	rm -rf /usr/lib/font/devpsc
+	mkdir /usr/lib/font/devpsc
+	cp *.aux *.map *.out DESC /usr/lib/font/devpsc
+	cd /usr/lib/font/devpsc ; chown $OWNER . * ; chgrp $GROUP . * ; \
+		chmod 755 . ; chmod 644 *.aux *.map *.out DESC
+	cd /usr/lib/ps/ditroff.font; chown $OWNER . * ; chgrp $GROUP . *
+Thu Jun 25 13:40:08 PDT 1987

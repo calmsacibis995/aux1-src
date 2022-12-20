@@ -1,0 +1,216 @@
+	sleep/wakeup in forwarder based systems
+	=======================================
+
+Caveats:	- so far this is ONLY supported for device opens, not for 
+		  module opens
+
+		- currently (V.2) only one process can be openning at any one time
+		  However this system allows more than one process to be openning at any
+		  one time, a small number may be sleeping (~16) at any one time,
+		  any others sleep at the stream head. Since V.3 will probably support
+		  multiple concurrent openers one should bear this in mind when writing
+		  drivers (usually not a problem).
+
+
+	This subsystem is designed to provide a mechanism for a driver open routine
+on a remote board to 'sleep' in the same manner that a current such routine does (for
+example a TTY waiting for carrier). Since the forwarder environment doesn't have
+processes (at least not yet) some other mechanism must be found. Consider the three
+possible scenarios:
+
+	1)	a device is opened and the open completes 'synchronously' (ie sync.
+		at the remote board). The following things happen:
+
+
+	Unix HOST				REMOTE
+	=========				======
+
+	Send M_FWD_OPEN->
+	sleep					receive M_FWD_OPEN, open succeeds
+						(or fails) synchronously, returns
+						<-M_FWD_ACK(done)
+	wakeup
+	return to process
+
+
+
+
+	2)	a device is opened and the open blocks remotely, the remote open
+		routine 'sleeps' by calling circ_sleep() and then returning
+		OPENSLEEP. Later the open completes when circ_wakeup() is called
+		remotely. The following things happen:
+
+
+	Unix HOST				REMOTE
+	=========				======
+
+	Send M_FWD_OPEN->
+	sleep					receive M_FWD_OPEN, open blocks
+						by calling circ_sleep() and then
+						returning OPENSLEEP
+						<-M_FWD_ACK(sleep)
+	wakeup
+	sleep
+						open completes (or fails) by calling
+						circ_wakeup()
+						<-M_FWD_ACK(done)
+	wakeup
+		
+
+	3)	a device is opened and the open blocks remotely, the remote open
+		routine 'sleeps' by calling circ_sleep() and then returning
+		OPENSLEEP. Later the opening process cancels the request when a
+		signal is delivered to it (for example a SIGINT). It requests the
+		remote end to cancel the open. If the remote end declared a cancel
+		routine it is called. The following things happen:
+
+	Unix HOST				REMOTE
+	=========				======
+
+	Send M_FWD_OPEN->
+	sleep					receive M_FWD_OPEN, open blocks
+						by calling circ_sleep() and then
+						returning OPENSLEEP
+						<-M_FWD_ACK(sleep)
+	wakeup
+	sleep
+	wakeup due to signal
+	Send M_FWD_CANCEL->
+						the devices cancel routine is called
+		
+
+
+	The sleep/wakeup routines are circ_sleep() and circ_wakeup() They have the 
+following parameters:
+
+	circ_sleep(q, acktags, cancel, param)
+	queue_t		*q;			/* the read queue */
+	fwd_acktags_t	*acktags;		/* the request message passed to
+						   the open routine */
+	procedure_t	cancel;			/* routine to call if the sleep is
+						   cancelled (NULL if none) */
+	int		param;			/* parameter to pass to to the
+						   cancel routineroutine */
+
+
+
+	circ_wakeup(q, id, err, setpgrp, dev)
+	queue_t *q;				/* the read queue */
+	int id;					/* the id from the sleep (-1 for all
+ 						   waiting on this queue, -2 for all
+						   waiting on this circuit) */
+	int err;				/* the error being passed back (if
+						   the open failed, 0 if it succeeded) */
+	int setpgrp;				/* true if required to set the process
+						   group on open */
+	dev_t dev;				/* cloned device's number (otherwise
+						   0) */
+
+
+NOTE:	- the sleep routine declares the address of the cancel routine for this
+	  sleep. It also specifies a parameter to pass to the cancel routine.
+
+	- the sleep routine returns a small positive integer. This can be used in
+	  wakeup to selectively wakeup this sleep.
+
+	- the wakeup routine is passed the sleep id from the sleep call. Or, more
+	  normally, -1 to mean wakeup all the circ_sleep() calls from this queue's
+	  open routine. -2 can also be passed meaning wakeup all the requests on
+	  all the queues on this circuit. This is not supported since sleeping by
+	  pushed module's open routines is not yet supported.
+
+	- when calling the wakeup routine one can pass back several pieces of
+	  information (apart from the wakeup)
+
+		err	- a normal Unix error code
+		setpgrp	- set the stream head to have the process requesting the open
+			  as it's process group leader for signals (usually only
+			  used by line disciplines)
+		dev	- the minor number of the device for a cloned open
+
+
+	When a cancel routine is called it is passed the following parameters	
+
+	dev_cancel(q, param, id)	
+	queue_t *q;				/* the read q passed to circ_sleep() */
+	int param;				/* the parameter passed to circ_sleep()*/
+	int id;					/* the id returned from circ_sleep() */
+
+
+
+
+	Example of use:
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+#include <fwd.h>
+
+dev_open(q, dev, flag, sflag, err, devp, acktags)
+queue_t		*q;				/* read queue */
+dev_t		dev;				/* device being opened */
+int		flag;				/* open flag */
+int		sflag;				/* stream open flag */
+int		*err;				/* pointer to returned error */
+dev_t		*devp;				/* device pointer (from clone,
+						   not used, for compatability only)*/
+fwd_acktags_t	*acktags;			/* the passed message contains:
+						 *	cred	- cred field from udot,
+						 *		  (uid, gis etc)
+						 *	setpgrp - set to 1 if you want
+						 *		  the process group
+						 *		  set on open.
+						 */
+{
+
+	s = spl?();
+
+	dev = minor(DEV)
+	if (dev > NDEV) {
+		*err = EINVAL;			/* how to return an error */
+		return(OPENFAIL);
+	}
+	tp->t_dev = dev;
+
+	.
+	.
+	.
+	.
+
+	if (!(tp->t_flag&CARR_ON && !(flag&O_NDELAY) {
+		(void)circ_sleep(q, acktags, dev_cancel, dev); /* how to sleep */
+		splx(s);
+		return(OPENSLEEP);
+	}
+	tp->t_state &= ~WOPEN;
+	tp->t_state |= ISOPEN;
+	return(0);				/* how to do sync. open complete */
+}
+
+dev_done(q, err)				/* call this when you wish to complete */
+queue_t *q;					/*	an open - err contains error */
+int err;					/*	if open fails (else 0) */
+{
+	struct ttx *tp;
+
+	tp = (struct ttx *)tp;
+	tp->t_state &= ~WOPEN;
+	if (!err) {
+		tp->t_state |= ISOPEN;
+		tp->t_state |= CARR_ON;
+	}
+	circ_wakeup(q, -1, err, 0, 0);	/* send wakeup message to host */
+}
+
+dev_cancel(q, param, id)			/* called when a sleeping request is */
+queue_t *q;					/*   	cancelled by the host (for */
+int param;					/*	example an open was */
+int id;						/*	interrupted by a signal) */
+{
+	register int s;
+
+	s = spl?();
+/* do cancel things (for example drop DTR, clear flags) */
+	splx(s);
+}
+

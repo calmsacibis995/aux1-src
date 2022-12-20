@@ -1,0 +1,17 @@
+start_up:
+	$(CP)	$(DEST)/bin/occ /bin/occ
+	$(CP)	$(DEST)/bin/oas /bin/oas
+	$(CP)	$(DEST)/bin/old /bin/old
+	$(CP)	$(DEST)/lib/occom /lib/occom
+	$(CP)	$(DEST)/lib/ocpp /lib/ocpp
+	$(CP)	$(DEST)/lib/ooptim /lib/ooptim
+	$(LN)	/lib/crt0.o /lib/ocrt0.o
+
+end_up:
+	$(RM)	-f $(DEST)/bin/occ /bin/occ
+	$(RM)	-f $(DEST)/bin/oas /bin/oas
+	$(RM)	-f $(DEST)/bin/old /bin/old
+	$(RM)	-f $(DEST)/lib/occom /lib/occom
+	$(RM)	-f $(DEST)/lib/ocpp /lib/ocpp
+	$(RM)	-f $(DEST)/lib/ooptim /lib/ooptim
+	$(RM)	-f /lib/ocrt0.o

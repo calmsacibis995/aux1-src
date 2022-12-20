@@ -1,0 +1,2 @@
+after each build, the corresponding files in the source directory from the
+build should be copied here.

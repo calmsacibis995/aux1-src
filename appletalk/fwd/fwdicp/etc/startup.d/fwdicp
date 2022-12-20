@@ -1,0 +1,14 @@
+while test -n "$1"
+do
+	case $1 in
+	-M)  	shift;
+		major=$1;;
+
+	-S)	shift;
+		echo "appletalk: loading icp board in slot"  $1;
+		/etc/fwdload -f /dev/fwdicp$1 -c /etc/startup.d/fwdicp.d/at_load;;
+
+	*)	;;
+	esac
+	shift
+done

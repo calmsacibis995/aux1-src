@@ -1,0 +1,35 @@
+'\" "@(#)Copyright Apple Computer 1987\tVersion 1.1 of troff.ad on 87/05/04 14:27:12"
+.rs
+.sp 2
+.ce 11
+.ft B
+.ps 24
+Growing Computer Software Company Seeks
+.sp 4
+.ft H
+experienced
+.sp 2
+\s28C Programmer
+.sp 5
+.fp 4 S
+.ft B
+\s24Knowledge of 
+.vs 30
+.ps +1
+\fHUNIX System V\fP 
+.ps -1
+A Must
+.vs
+.sp 5
+Opportunity For \fIRapid\fB Advancement
+.sp 6
+.ps 24
+\v'-0.2i'Up\v'+0.2i'beat Working Environment
+.sp 4
+\s20Call 012-345-6789
+.sp 2
+or
+.sp 2
+Lo\h'-0.33m'ok In These Pages For Further Information
+.ft R
+.ps 10

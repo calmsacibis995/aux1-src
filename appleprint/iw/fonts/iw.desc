@@ -1,0 +1,20 @@
+# troff description file for ImageWriterII
+
+name        iw
+res         144
+hor         1
+vert        1
+unitwidth   10
+paperlength 1584
+paperwidth  1224
+
+font    R   regular "New York"  plain           IWFONTS  Apple.map
+font    I   regular "New York"  italic          IWFONTS  Apple.map
+font    B   regular "New York"  bold            IWFONTS  Apple.map
+font    BI  regular "New York"  "bold italic"   IWFONTS  Apple.map
+font    H   regular Geneva	plain           IWFONTS  Apple.map
+font    HB  regular Geneva	bold            IWFONTS  Apple.map
+font    C   regular Monaco	plain           IWFONTS  Apple.map
+font    CB  regular Monaco	bold            IWFONTS  Apple.map
+font	S1  special special     plain		special  special.map
+font    S   special Symbol	plain           IWFONTS  Symbol.map

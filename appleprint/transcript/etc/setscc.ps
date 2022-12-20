@@ -1,0 +1,16 @@
+%!
+
+% little proc to set the EEROM scc parameters
+% @(#)Copyright Apple Computer 1987\tVersion 1.1 of setscc.ps on 87/05/04 19:10:41
+serverdict begin
+statusdict begin
+25 sccbatch = =
+0 checkpassword
+   {0 exitserver}
+   {(Incorrect Server Password!!)= flush}
+ifelse
+
+statusdict begin
+
+25 19200 0 setsccbatch
+end

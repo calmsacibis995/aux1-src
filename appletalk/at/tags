@@ -1,0 +1,194 @@
+BIT_COUNT	lap/at_lap.c	/^BIT_COUNT(VALUE)$/
+Mappletalk	util/appletalk.c	/^main(argc,argv)$/
+Mat_laplkup	lap/at_laplkup.c	/^main(argc, argv)$/
+Mat_nbpd	util/at_nbpd.c	/^main()$/
+Mat_nvedel	util/at_nvedel.c	/^main(argc,argv)$/
+Mat_nvelkup	util/at_nvelkup.c	/^main(argc,argv)$/
+Mat_nvereg	util/at_nvereg.c	/^main(argc,argv)$/
+Mat_nveshut	util/at_nveshut.c	/^main(argc,argv)$/
+Mat_printer	util/at_printer.c	/^main(argc, argv)$/
+Mat_server	util/at_server.c	/^main(argc, argv)$/
+Mat_status	util/at_status.c	/^main(argc, argv)$/
+XMIT_CTL	lap/at_lap.c	/^#define	XMIT_CTL(TYPE, DESTINATION)					\\$/
+XMIT_CTL_P	lap/at_lap.c	/^#define	XMIT_CTL_P(TYPE, DESTINATION)					\\$/
+XMIT_DATA_FRAME	lap/at_lap.c	/^#define	XMIT_DATA_FRAME(BEGIN, END)					\\$/
+access_net	lap/at_lap.c	/^access_net(lapp)$/
+account_rcverr	lap/at_lap.c	/^account_rcverr(lapp, status)$/
+adjust_backoff	lap/at_lap.c	/^adjust_backoff(lapp)$/
+alloc_number	util/at_nbpd.c	/^alloc_number(ep)$/
+at_atp_get_poll	lib/atp_gtpoll.c	/^at_atp_get_poll(fd, buff)$/
+at_atp_get_request	lib/atp_get.c	/^at_atp_get_request(fd, buff)$/
+at_atp_get_request_note	lib/atp_gtnote.c	/^at_atp_get_request_note(fd)$/
+at_atp_get_request_nw	lib/atp_get_nw.c	/^at_atp_get_request_nw(fd)$/
+at_atp_issue_request	lib/atp_is.c	/^at_atp_issue_request(fd, count, buff, len)$/
+at_atp_issue_request_def	lib/atp_isd.c	/^at_atp_issue_request_def(fd, count, buff, len, rat/
+at_atp_issue_request_def_note	lib/atp_isd_nt.c	/^at_atp_issue_request_def_note(fd, count, buff, len/
+at_atp_issue_request_def_nw	lib/atp_isd_nw.c	/^at_atp_issue_request_def_nw(fd, count, buff, len, /
+at_atp_issue_request_def_xo	lib/atp_isd_x.c	/^at_atp_issue_request_def_xo(fd, count, buff, len, /
+at_atp_issue_request_def_xo_note	lib/atp_isdxnt.c	/^at_atp_issue_request_def_xo_note(fd, count, buff, /
+at_atp_issue_request_def_xo_nw	lib/atp_isdxnw.c	/^at_atp_issue_request_def_xo_nw(fd, count, buff, le/
+at_atp_issue_request_note	lib/atp_is_nt.c	/^at_atp_issue_request_note(fd, count, buff, len)$/
+at_atp_issue_request_nw	lib/atp_is_nw.c	/^at_atp_issue_request_nw(fd, count, buff, len)$/
+at_atp_issue_request_xo	lib/atp_is_x.c	/^at_atp_issue_request_xo(fd, count, buff, len)$/
+at_atp_issue_request_xo_note	lib/atp_is_xnt.c	/^at_atp_issue_request_xo_note(fd, count, buff, len)/
+at_atp_issue_request_xo_nw	lib/atp_is_xnw.c	/^at_atp_issue_request_xo_nw(fd, count, buff, len)$/
+at_atp_open	lib/atp_open.c	/^at_atp_open()$/
+at_atp_poll_request	lib/atp_rqpoll.c	/^at_atp_poll_request(fd, id, buff)$/
+at_atp_release_response	lib/atp_releas.c	/^at_atp_release_response(fd, buff)$/
+at_atp_send_response	lib/atp_send.c	/^at_atp_send_response(fd, index, buff, len)$/
+at_atp_send_response_eof	lib/atp_sndeof.c	/^at_atp_send_response_eof(fd, index, buff, len)$/
+at_atp_set_default	lib/atp_st_def.c	/^at_atp_set_default(fd, rate, retries)$/
+at_atp_set_hdr	lib/atp_st_hdr.c	/^at_atp_set_hdr(req, resp)$/
+at_chooser	lib/at_chooser.c	/^int at_chooser(object,type,zone,trys,seconds)$/
+at_close_dynamic_socket	lib/at_cl_dskt.c	/^int at_close_dynamic_socket(socket_desc)$/
+at_close_requesting_socket	lib/at_atp_orq.c	/^int at_close_requesting_socket(fd)$/
+at_close_responding_socket	lib/at_atp_orp.c	/^int at_close_responding_socket(fd)$/
+at_close_socket	lib/at_cl_skt.c	/^int at_close_socket(socket_desc)$/
+at_confirm_nve	lib/at_con_nve.c	/^int at_confirm_nve(object,olen,type,tlen,zone,zlen/
+at_decompose_en	lib/at_dec_en.c	/^int at_decompose_en(en,enlen,optr,olen,tptr,tlen,z/
+at_deregister_name_en	lib/at_drgn_en.c	/^int at_deregister_name_en(en,enlen)$/
+at_deregister_name_nve	lib/at_drgnnve.c	/^int at_deregister_name_nve(object,object_len,type,/
+at_deregister_nve	lib/at_drg_nve.c	/^int at_deregister_nve(nve_number)$/
+at_error	lib/at_error.c	/^void at_error  (number,fn,format,p1,p2,p3,p4,p5,p6/
+at_error_set	lib/at_err_set.c	/^int at_error_set  (new_stat)$/
+at_execute	lib/at_execute.c	/^int at_execute(pathnames,pgm,args)$/
+at_find_dflt_netw	lib/at_fnd_ntw.c	/^int at_find_dflt_netw()$/
+at_get_cfg	lib/at_getnet.c	/^static int at_get_cfg()$/
+at_get_ddp_length	lib/at_gddplen.c	/^int at_get_ddp_length(ptr)$/
+at_get_net_number	lib/at_getnet.c	/^int at_get_net_number()$/
+at_get_node_number	lib/at_getnet.c	/^int at_get_node_number()$/
+at_lap_interrupt	lap/at_lap.c	/^void at_lap_interrupt(dev, status)$/
+at_lookup_en	lib/at_lk_en.c	/^int at_lookup_en(en,enlen,trys,trywait)$/
+at_lookup_nve	lib/at_lk_nve.c	/^int at_lookup_nve(object,object_len,type,type_len,/
+at_lookup_or_confirm_nve	lib/at_lk_cnf.c	/^int at_lookup_or_confirm_nve(object,object_len,typ/
+at_nbp_shutdown	lib/at_nbp_dwn.c	/^at_nbp_shutdown()$/
+at_open_dynamic_socket	lib/at_op_dskt.c	/^int at_open_dynamic_socket(open_mode,socket_number/
+at_open_requesting_socket	lib/at_atp_orq.c	/^int at_open_requesting_socket()$/
+at_open_responding_socket	lib/at_atp_orp.c	/^int at_open_responding_socket()$/
+at_open_socket	lib/at_op_skt.c	/^int at_open_socket(open_mode,socket)$/
+at_pap_close	lib/at_pap_cl.c	/^at_pap_close(fd)$/
+at_pap_open_nve	lib/at_pap_opn.c	/^at_pap_open_nve(object, object_len, type, type_len/
+at_pap_read	lib/at_pap_rd.c	/^at_pap_read(fd, data, len)$/
+at_pap_read_ignore	lib/at_pap_rig.c	/^at_pap_read_ignore(fd)$/
+at_pap_status_nve	lib/at_pap_sts.c	/^at_pap_status_nve(object, object_len, type, type_l/
+at_pap_write	lib/at_pap_wr.c	/^at_pap_write(fd, data, len)$/
+at_pap_write_eof	lib/at_pap_wre.c	/^at_pap_write_eof(fd, data, len)$/
+at_pap_write_flush	lib/at_pap_wrf.c	/^at_pap_write_flush(fd, data, len)$/
+at_papsl_close	lib/at_pap_scl.c	/^at_papsl_close(fd)$/
+at_papsl_deregister_nve	lib/at_pap_drg.c	/^at_papsl_deregister_nve(object, object_len, type, /
+at_papsl_get_next_job	lib/at_pap_get.c	/^at_papsl_get_next_job(fd)$/
+at_papsl_heres_status	lib/at_pap_hst.c	/^at_papsl_heres_status(fd, status)$/
+at_papsl_init_nve	lib/at_pap_int.c	/^at_papsl_init_nve(object, object_len, type, type_l/
+at_papsl_register_nve	lib/at_pap_reg.c	/^at_papsl_register_nve(fd, object, object_len, type/
+at_ptm	lib/at_ptm.c	/^void at_ptm  (number,lfmt,lval,rfmt,p1,p2,p3,p4,p5/
+at_read_datagram	lib/at_ddp_rd.c	/^int at_read_datagram(fildes,buffer,length,$/
+at_receive_request	lib/at_atp_rcv.c	/^int at_receive_request(socket,from_net_ptr,from_no/
+at_register_en	lib/at_reg_en.c	/^int at_register_en(en,enlen,socket,trys,trywait)$/
+at_register_nve	lib/at_reg_nve.c	/^int at_register_nve(object,object_len,type,type_le/
+at_send_request	lib/at_atp_sn.c	/^int at_send_request(socket,treq_buff)$/
+at_send_request_mb	lib/at_atp_smb.c	/^at_atpreq *at_send_request_mb(socket,to_net,to_nod/
+at_send_request_sb	lib/at_atp_ssb.c	/^at_atpreq *at_send_request_sb(socket,to_net,to_nod/
+at_send_response	lib/at_atp_rp.c	/^int at_send_response(socket,treq_buff)$/
+at_send_response_mb	lib/at_atp_rmb.c	/^int at_send_response_mb(socket,to_net,to_node,to_s/
+at_send_response_sb	lib/at_atp_rsb.c	/^int at_send_response_sb (socket,to_net,to_node,to_/
+at_send_to_dev	lib/at_snd_dev.c	/^int at_send_to_dev(fd, cmd, dp, length)$/
+at_set_ddp_length	lib/at_sddplen.c	/^void at_set_ddp_length(ptr,len)$/
+at_timeout	lap/at_lap.c	/^#define	at_timeout(TIME, TIMER)						\\$/
+at_timer_interrupt	lap/at_lap.c	/^void at_timer_interrupt()$/
+at_write_datagram	lib/at_ddp_wr.c	/^int at_write_datagram(fildes,buffer,length,net,nod/
+atp_clear	atp/atp_misc.c	/^atp_clear(rcbp)$/
+atp_close	atp/atp_open.c	/^atp_close(q, flag)$/
+atp_free	atp/atp_misc.c	/^atp_free(trp)$/
+atp_init	atp/atp_open.c	/^atp_init()$/
+atp_iocack	atp/atp_misc.c	/^atp_iocack(atp, m)$/
+atp_iocnak	atp/atp_misc.c	/^atp_iocnak(atp, m, err)$/
+atp_open	atp/atp_open.c	/^atp_open(q, dev, flag, sflag, err, devp)$/
+atp_rcb_alloc	atp/atp_alloc.c	/^atp_rcb_alloc(atp)$/
+atp_rcb_free	atp/atp_alloc.c	/^atp_rcb_free(rcbp, resp)$/
+atp_rcb_timer	atp/atp_misc.c	/^atp_rcb_timer(rcbp)$/
+atp_reply	atp/atp_misc.c	/^atp_reply(rcbp)$/
+atp_req_timeout	atp/atp_misc.c	/^atp_req_timeout(trp)$/
+atp_rputq	atp/atp_read.c	/^atp_rputq(q, m)$/
+atp_rsrvc	atp/atp_read.c	/^atp_rsrvc(q)$/
+atp_same_socket	atp/atp_misc.c	/^atp_same_socket(socket, ddp) $/
+atp_send	atp/atp_misc.c	/^atp_send(trp)$/
+atp_tid	atp/atp_misc.c	/^atp_tid(atp)$/
+atp_trans_alloc	atp/atp_alloc.c	/^atp_trans_alloc(atp)$/
+atp_trans_free	atp/atp_alloc.c	/^atp_trans_free(trp)$/
+atp_wputq	atp/atp_write.c	/^atp_wputq(q, m)$/
+atp_wsrvc	atp/atp_write.c	/^atp_wsrvc(q)$/
+atp_wwake	atp/atp_write.c	/^atp_wwake(atp)$/
+atp_x_done	atp/atp_read.c	/^atp_x_done(trp)$/
+buildentry	util/at_nbpd.c	/^buildentry(tp, uid)$/
+calculate_ddp_chksum	ddp/at_ddp.c	/^calculate_ddp_chksum(m, offset)$/
+data_error	lap/at_lap.c	/^data_error(errno,mp,q)$/
+ddp_age_bridge	ddp/at_ddp.c	/^ddp_age_bridge(int_ddpp, time)$/
+ddp_close	ddp/at_ddp.c	/^ddp_close(q, flag)$/
+ddp_hangup	ddp/at_ddp.c	/^ddp_hangup(ddpp, time)$/
+ddp_open	ddp/at_ddpopen.c	/^ddp_open(q, dev, flag, sflag, err, devp$/
+ddp_rputq	ddp/at_ddp.c	/^ddp_rputq(q, m)$/
+ddp_rsrvc	ddp/at_ddp.c	/^ddp_rsrvc(q)$/
+ddp_wputq	ddp/at_ddp.c	/^ddp_wputq(q, m)$/
+delete	util/at_nbpd.c	/^delete(ep)$/
+depth	util/at_nbpd.c	/^depth(ep, func)$/
+fill_tuple	util/at_nbpd.c	/^fill_tuple(tp, net, node, socket, number, object, /
+fwdthisopen	ddp/fwdddp.c	/^fwdthisopen(q, dev, flag, sflag, err, devp)$/
+get_cfg	util/at_nbpd.c	/^get_cfg()$/
+get_upstreamq	lap/at_lap.c	/^get_upstreamq(type, lapp)$/
+init_stats	ddp/at_ddp.c	/^init_stats(ddpp)$/
+insert	util/at_nbpd.c	/^insert(ep)$/
+ioc_ack	lap/at_lap.c	/^ioc_ack(errno,m,q)$/
+lap_close	lap/at_lap.c	/^lap_close(q, flag)$/
+lap_hangup	lap/at_lap.c	/^lap_hangup(lapp, time)$/
+lap_offline	lap/at_lap.c	/^lap_offline(lapp)$/
+lap_rsrvc	lap/at_lap.c	/^lap_rsrvc(q)$/
+lap_wputq	lap/at_lap.c	/^lap_wputq(q, m)$/
+lap_wsrvc	lap/at_lap.c	/^lap_wsrvc(q)$/
+locate	util/at_nbpd.c	/^locate(nbp, func)$/
+lookup_reply	util/at_nbpd.c	/^lookup_reply(ep)$/
+nbp_close	nbp/at_nbpd.c	/^nbp_close(q)$/
+nbp_complete	nbp/at_nbpd.c	/^nbp_complete(m, err)$/
+nbp_fin_register	nbp/at_nbpd.c	/^nbp_fin_register(m)$/
+nbp_open	nbp/at_nbpd.c	/^nbp_open(q, dev, flag, sflag, err, devp$/
+nbp_rputq	nbp/at_nbpd.c	/^nbp_rputq(q, m)$/
+nbp_timeout	nbp/at_nbpd.c	/^nbp_timeout(m)$/
+nbp_verify	nbp/at_nbpd.c	/^nbp_verify(m, zone)$/
+nbp_wsrvc	nbp/at_nbpd.c	/^nbp_wsrvc(q)$/
+nbp_wtime	nbp/at_nbpd.c	/^nbp_wtime(q)$/
+nbpd_age_bridge	nbp/at_nbpd.c	/^nbpd_age_bridge(q)$/
+nbpd_close	nbp/at_nbpd.c	/^nbpd_close(q, flag)$/
+nbpd_newid	nbp/at_nbpd.c	/^nbpd_newid()$/
+nbpd_open	nbp/at_nbpd.c	/^nbpd_open(q, dev, flag, sflag, err, devp$/
+nbpd_rputq	nbp/at_nbpd.c	/^nbpd_rputq(q, m)$/
+nbpd_rsrvc	nbp/at_nbpd.c	/^nbpd_rsrvc(q)$/
+nbpd_wputq	nbp/at_nbpd.c	/^nbpd_wputq(q, m)$/
+nbpd_wsrvc	nbp/at_nbpd.c	/^nbpd_wsrvc(q)$/
+new_queue	lap/at_lap.c	/^new_queue(rd_qinit, wr_qinit)$/
+pap_close	pap/at_pap.c	/^static $/
+pap_open	pap/at_pap.c	/^pap_open(q, dev, flag, sflag, err, devp$/
+pap_read_ignore	pap/at_pap.c	/^pap_read_ignore(q)$/
+pap_rputq	pap/at_pap.c	/^pap_rputq(q, m)$/
+pap_rsrvc	pap/at_pap.c	/^pap_rsrvc(q)$/
+pap_timeout	pap/at_pap.c	/^static $/
+pap_wputq	pap/at_pap.c	/^pap_wputq(q, m)$/
+pap_wsrvc	pap/at_pap.c	/^static $/
+papd_arbitrate	pap/at_papd.c	/^papd_arbitrate(q)$/
+papd_block	pap/at_papd.c	/^papd_block(q)$/
+papd_close	pap/at_papd.c	/^static $/
+papd_complete	pap/at_papd.c	/^papd_complete(q)$/
+papd_insertq	pap/at_papd.c	/^papd_insertq(papdp, m)$/
+papd_open	pap/at_papd.c	/^papd_open(q, dev, flag, sflag, err, devp$/
+papd_outwake	pap/at_papd.c	/^papd_outwake(q)$/
+papd_rputq	pap/at_papd.c	/^papd_rputq(q, m)$/
+papd_rsrvc	pap/at_papd.c	/^papd_rsrvc(q)$/
+papd_wake	pap/at_papd.c	/^static $/
+papd_wputq	pap/at_papd.c	/^papd_wputq(q, m)$/
+papd_wsrvc	pap/at_papd.c	/^static $/
+rcv_data_frame	lap/at_lap.c	/^rcv_data_frame(lapp)$/
+schedule	lap/at_lap.c	/^schedule(lapp)$/
+send_rest	util/at_nbpd.c	/^send_rest()$/
+set_up	util/at_nbpd.c	/^set_up(buff, type)$/
+strupcmp	util/at_nbpd.c	/^int $/
+xmit_ack	lap/at_lap.c	/^xmit_ack(lapp)$/
+xmit_cts	lap/at_lap.c	/^xmit_cts(lapp)$/
+xmit_frame	lap/at_lap.c	/^xmit_frame(lapp)$/

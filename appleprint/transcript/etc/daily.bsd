@@ -1,0 +1,18 @@
+# etc/daily.bsd
+#
+# @(#)Copyright Apple Computer 1987\tVersion 1.1 of daily.bsd on 87/05/04 19:09:28
+# this code is included as part of our daily.sh file
+# which is invoked by cron(8) with the following crontab
+# entry:
+# 1 0 * * * sh </usr/adm/daily.sh >/usr/adm/daily.log
+
+printers="LIST OF POSTSCRIPT PRINTERS'
+for p in $printers
+do
+	# rotate log files
+	cp LOGDIR/PRINTER-log	LOGDIR/PRINTER-log.1
+	cp /dev/null		LOGDIR/PRINTER-log
+
+	# summarize printer accounting
+	/etc/pac -PPRINTER -s
+done

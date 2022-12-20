@@ -1,0 +1,23 @@
+#
+# 	@(#)Copyright Apple Computer 1987	Version 1.4 of MAKEfile on 87/09/02 10:54:28 
+#
+# Makefile to call make file in psn...
+#
+SHELL=		/bin/sh
+PSN=		psn
+MAKEFILE=	makefile
+DEST=		
+CD=		cd
+CP=		cp
+
+all:
+	$(CD) $(PSN) ; $(MAKE) -f $(MAKEFILE)
+	$(CP) $(PSN)/newunix $(DEST)/newunix
+	$(CP) $(PSN)/newunix $(DEST)/unix
+	$(CP) $(PSN)/boot.d/ae6 $(DEST)/etc/install.d/boot.d
+	$(CP) $(PSN)/boot.d/nfs $(DEST)/etc/install.d/boot.d
+	$(CP) $(PSN)/boot.d/BNET $(DEST)/etc/install.d/boot.d
+	$(CP) $(PSN)/boot.d/toolbox $(DEST)/etc/install.d/boot.d
+	$(CP) $(PSN)/boot.d/toolbox $(DEST)/etc/boot.d
+	$(CP) $(PSN)/master.d/toolbox $(DEST)/etc/master.d
+

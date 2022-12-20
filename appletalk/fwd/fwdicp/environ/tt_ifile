@@ -1,0 +1,30 @@
+/*	ident	<@(#) ast icp ifile 1.1> */
+MEMORY	{
+	VECTORS:origin	=	0x0,		length	=	0x600
+	ACCESS:	origin	=	0x0600,		length	=	0x1000
+	RAM:	origin	=	0x01600,	length	=	0x3d600
+	STACK:	origin	=	0x7f000,	length	=	0x1000
+}
+
+SECTIONS {
+	.start:
+	{
+		tt_locore.o(.text)
+	} > VECTORS
+
+	.access:
+	{
+		icpaccess.o(.data)
+	} > ACCESS
+
+	.text: { } > RAM
+
+	.data: { } > RAM
+
+	.bss: { } > RAM
+
+	stack (NOLOAD):	{
+		stackend	= .+0xff8;
+	} > STACK
+}
+_start = 0x00;

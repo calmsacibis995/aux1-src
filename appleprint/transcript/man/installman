@@ -1,0 +1,12 @@
+
+#  @(#)Copyright Apple Computer 1987\tVersion 1.3 of installman on 87/07/28 19:18:50
+section=$1
+mandir=$2
+ext=`expr $mandir : '.*\(.\)$'`
+for i in *.$section
+do
+	nroff -man $i | col > xxx
+	pack xxx
+	cp xxx.z $mandir/`basename $i .$section`.$ext.z
+	rm -f xxx.z
+done

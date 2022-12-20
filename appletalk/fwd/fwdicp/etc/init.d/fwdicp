@@ -1,0 +1,17 @@
+rm -f /dev/fwdicp??
+d=0
+while test -n "$1"
+do
+	case $1 in
+	-M)  	shift;
+		major=$1;;
+
+	-S)	shift;
+		mknod /dev/fwdicp$1 c $major $d;
+		d=`expr $d + 1`;;
+		
+
+	*)	;;
+	esac
+	shift
+done

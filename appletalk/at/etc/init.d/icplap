@@ -1,0 +1,35 @@
+I=
+while test -n "$1"
+do
+	case $1 in
+	-M)  	shift;
+#		dev_kill $1 /dev /dev/*
+		rm -rf  /dev/appletalk$I
+		mkdir	/dev/appletalk$I
+		chown bin /dev/appletalk$I
+		chgrp bin /dev/appletalk$I
+		chmod 755 /dev/appletalk$I
+		mkdir	/dev/appletalk$I/lap
+		chown bin /dev/appletalk$I/lap
+		chgrp bin /dev/appletalk$I/lap
+		chmod 755 /dev/appletalk$I/lap
+		mknod	/dev/appletalk$I/lap/control c $1 0
+		chown bin /dev/appletalk$I/lap/control
+		chgrp bin /dev/appletalk$I/lap/control
+		chmod 666 /dev/appletalk$I/lap/control
+		mknod	/dev/appletalk$I/lap/circuits c 12 $1
+		chown bin /dev/appletalk$I/lap/circuits
+		chgrp bin /dev/appletalk$I/lap/circuits
+		chmod 666 /dev/appletalk$I/lap/circuits
+		case $I in
+			2)	I=3;;
+			3)	I=4;;
+			4)	I=5;;
+			5)	I=6;;
+			*)	I=2;;
+		esac
+		;;
+	*)	;;
+	esac
+	shift
+done

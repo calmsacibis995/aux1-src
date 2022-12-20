@@ -1,0 +1,21 @@
+name S1
+internalname 200,0
+special
+charset
+\|	4	0	00
+\^	2	0	00
+_	12	1	041
+ru	12	1	041
+br	1	1	042
+lt	8	1	043
+lb	8	1	044
+rt	7	1	045
+rb	7	1	046
+lk	7	1	047
+rk	8	1	050
+bv	7	1	051
+lf	7	1	052
+rf	6	1	053
+lc	7	1	054
+rc	6	1	055
+ul	12	1	056

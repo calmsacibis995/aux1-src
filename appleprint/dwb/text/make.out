@@ -1,0 +1,512 @@
+Thu Jun 25 13:03:07 PDT 1987
+	make -f text.mk ARGS=install ROOT= CH= INS=cp all
+
+
+
+			Copyright (c) 1984 AT&T
+			  All Rights Reserved
+
+   THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF AT&T
+The copyright notice above does not evidence any actual or
+intended publication of such source code.
+
+
+
+	cd roff.d/nroff.d; make -f nroff.mk nroff INCORE=-DINCORE \
+		ROOT= CH= install
+	cc -O -DINCORE -DNROFF -I./ -c ../n1.c
+	cc -O -DINCORE -DNROFF -I./ -c ../n2.c
+	cc -O -DINCORE -DNROFF -I./ -c ../n3.c
+	cc -O -DINCORE -DNROFF -I./ -c ../n4.c
+	cc -O -DUSG -DINCORE -DNROFF -c ../n5.c
+	cc -O -DINCORE -DNROFF -I../ -c n6.c
+	cc -O -DINCORE -DNROFF -I./ -c ../n7.c
+	cc -O -DINCORE -DNROFF -c ../n8.c
+	cc -O -DINCORE -DNROFF -I./ -c ../n9.c
+	cc -O -DINCORE -DNROFF -I../ -c n10.c
+	cc -O -DINCORE -DNROFF -c ../ni.c
+	cc -O -DINCORE -DNROFF -I./ -c ../nii.c
+	cc -O -DINCORE -DNROFF -c ../hytab.c
+	cc -O -DINCORE -DNROFF -c ../suftab.c
+	cc -s -n -o nroff  n1.o n2.o n3.o n4.o n5.o n6.o n7.o n8.o n9.o n10.o ni.o nii.o hytab.o suftab.o 
+	cp nroff /bin
+	 cd /bin; chmod 755 nroff; chgrp bin nroff; chown bin nroff
+	cd roff.d/nroff.d/terms.d; make -f terms.mk \
+		ROOT= CH= install
+	cat ab.8510 >tab.8510
+	cat a.2631 b.lp >tab.2631
+	cat a.2631-c b.lp >tab.2631-c
+	cat a.2631-e b.lp >tab.2631-e
+	cat a.300 b.300 >tab.300
+	cat a.300-12 b.300 >tab.300-12
+	cat a.300s b.300 >tab.300s
+	cat a.300s-12 b.300 >tab.300s-12
+	cat ab.37 >tab.37
+	cat a.382 b.300 >tab.382
+	cat a.4000a b.300 >tab.4000a
+	cat a.450 b.300 >tab.450
+	cat a.450-12 b.300 >tab.450-12
+	cat a.832 b.300 >tab.832
+	cat a.lp b.lp >tab.lp
+	cat ab.tn300 >tab.tn300
+	cat ab.X >tab.X
+	if [ ! -d /usr/lib/nterm ]; then rm -f /usr/lib/nterm;  mkdir /usr/lib/nterm; \
+		chmod 755 /usr/lib/nterm;  fi
+	cp tab.8510 tab.2631 tab.2631-c tab.2631-e tab.300 tab.300-12 tab.300s  tab.300s-12 tab.37 tab.382 tab.4000a tab.450  tab.450-12 tab.832 tab.lp tab.tn300 tab.X /usr/lib/nterm
+	cd /usr/lib/nterm; rm -f tab.300S tab.300S-12 tab.4000A; \
+			ln tab.300s tab.300S; ln tab.300s-12 tab.300S-12; \
+			ln tab.4000a tab.4000A; \
+	cd /usr/lib/nterm; chmod 644 tab.8510 tab.2631 tab.2631-c tab.2631-e tab.300 tab.300-12 tab.300s  tab.300s-12 tab.37 tab.382 tab.4000a tab.450  tab.450-12 tab.832 tab.lp tab.tn300 tab.X tab.300S tab.300S-12 tab.4000A; \
+		 chgrp bin tab.8510 tab.2631 tab.2631-c tab.2631-e tab.300 tab.300-12 tab.300s  tab.300s-12 tab.37 tab.382 tab.4000a tab.450  tab.450-12 tab.832 tab.lp tab.tn300 tab.X tab.300S tab.300S-12 tab.4000A; chown bin tab.8510 tab.2631 tab.2631-c tab.2631-e tab.300 tab.300-12 tab.300s  tab.300s-12 tab.37 tab.382 tab.4000a tab.450  tab.450-12 tab.832 tab.lp tab.tn300 tab.X tab.300S tab.300S-12 tab.4000A
+	cd roff.d/troff.d; make -f troff.mk troff INCORE=-DINCORE \
+		ROOT= CH= install
+	cc -O -DINCORE -c ../n1.c
+	cc -O -DINCORE -c ../n2.c
+	cc -O -DINCORE -c ../n3.c
+	cc -O -DINCORE -c ../n4.c
+	cc -O -DUSG -DINCORE -c ../n5.c
+	cc -O -DINCORE -I../ -c t6.c
+	cc -O -DINCORE -c ../n7.c
+	cc -O -DINCORE -c ../n8.c
+	cc -O -DINCORE -c ../n9.c
+	cc -O -DINCORE -I../ -c t10.c
+	cc -O -DINCORE -c ../ni.c
+	cc -O -DINCORE -c ../nii.c
+	cc -O -DINCORE -c ../hytab.c
+	cc -O -DINCORE -c ../suftab.c
+	cc -s -n -o troff  n1.o n2.o n3.o n4.o n5.o t6.o n7.o n8.o n9.o t10.o ni.o nii.o hytab.o suftab.o 
+	cc -s -n -o makedev makedev.c
+	cc -O -c tc.c
+	cc -O -c draw.c
+	cc -s -n  -o tc tc.o draw.o -lm
+	cp tc /usr/bin
+	 cd /usr/bin; chmod 755 tc; chgrp bin tc; chown bin tc
+	cp makedev /usr/bin
+	 cd /usr/bin; chmod 755 makedev; chgrp bin makedev; chown bin makedev
+	cp troff /bin
+	 cd /bin; chmod 755 troff; chgrp bin troff; chown bin troff
+	cd roff.d/troff.d/devaps; make -f devaps.mk \
+		ROOT= CH= install
+	if [ ! -d /usr/lib/font ] ; then rm -f /usr/lib/font;  mkdir /usr/lib/font; \
+		chmod 755 /usr/lib/font;  fi
+	if [ ! -d /usr/lib/font/devaps ] ; then rm -f /usr/lib/font/devaps;  mkdir /usr/lib/font/devaps; \
+		chmod 755 /usr/lib/font/devaps;  fi
+	cc -O -I../ -c daps.c
+	cc -O -c build.c
+	cc -s -n  -o daps daps.o ../draw.o build.o -lm
+	cc -O -I../ -s -n -o ./makedev ./makedev.c
+	./makedev DESC
+  R: 109 chars, width  33, size 621
+  I: 109 chars, width  33, size 621
+  B: 109 chars, width  33, size 621
+  H: 101 chars, width  33, size 621
+ CW: 105 chars, width  68, size 621
+  S:  79 chars, width  33, size 621
+ S1:  37 chars, width  33, size 621
+ GR:  51 chars, width  33, size 621
+	for i in [A-Z] [A-Z][0-9A-Z] DESC; \
+	do	if [ ! -r $i.out ] || [ -n "`find $i -newer $i.out -print`" ]; \
+		   then	./makedev $i; \
+		fi; \
+	done
+  C: 101 chars, width  33, size 621
+  G: 101 chars, width  33, size 621
+ BI: 101 chars, width  33, size 621
+ CE: 101 chars, width  33, size 621
+ CI: 101 chars, width  33, size 621
+ CT:  92 chars, width  63, size 621
+ CX: 101 chars, width  33, size 621
+ GB:  51 chars, width  33, size 621
+ GI: 101 chars, width  33, size 621
+ GS:  96 chars, width  33, size 621
+ HB: 101 chars, width  33, size 621
+ HI: 101 chars, width  33, size 621
+ HK: 101 chars, width  33, size 621
+ HL: 101 chars, width  33, size 621
+ HX: 101 chars, width  33, size 621
+ MB: 101 chars, width  33, size 621
+ MI: 101 chars, width  33, size 621
+ MR: 101 chars, width  33, size 621
+ MX: 101 chars, width  33, size 621
+ PA: 101 chars, width  33, size 621
+ PB: 101 chars, width  33, size 621
+ PI: 101 chars, width  33, size 621
+ PO: 105 chars, width  68, size 621
+ PX: 101 chars, width  33, size 621
+ SC:  96 chars, width  33, size 621
+ SM:  96 chars, width  33, size 621
+ TB: 101 chars, width  33, size 621
+ TX: 101 chars, width  33, size 621
+	if [ -r LINKFILE ]; then \
+	    sh ./LINKFILE; \
+	fi
+	cp [A-Z].[oa][ud][td] [A-Z][0-9A-Z].[oa][ud][td] DESC.out version /usr/lib/font/devaps;
+	cd /usr/lib/font/devaps; chmod 644 [A-Z].[oa][ud][td] [A-Z][0-9A-Z].[oa][ud][td] DESC.out version;  \
+		 chgrp bin [A-Z].[oa][ud][td] [A-Z][0-9A-Z].[oa][ud][td] DESC.out version; chown bin [A-Z].[oa][ud][td] [A-Z][0-9A-Z].[oa][ud][td] DESC.out version
+	cp  daps /usr/bin
+	cd /usr/bin; chmod 755 daps;  chgrp bin daps; chown bin daps
+	cd macros.d;  make -f macros.mk ROOT= CH= install
+	sh ./macrunch strings.mm
+	sh ./macrunch mmn
+	sh ./macrunch mmt
+	sh ./macrunch vmca
+	sh ./macrunch ptx
+	sh ./macrunch an
+	if [ ! -d /usr/lib/macros ]; then rm -f /usr/lib/macros; \
+		mkdir /usr/lib/macros;  chmod 755 /usr/lib/macros;  fi
+	if [ ! -d /usr/lib/tmac ]; then rm -f /usr/lib/tmac; \
+		mkdir /usr/lib/tmac;  chmod 755 /usr/lib/tmac;  fi 
+	cp tmac.an tmac.m tmac.ptx tmac.v /usr/lib/tmac
+	cd /usr/lib/tmac; chmod 644 tmac.an tmac.m tmac.ptx tmac.v;  chgrp bin tmac.an tmac.m tmac.ptx tmac.v; chown bin tmac.an tmac.m tmac.ptx tmac.v
+	cp mmn /usr/lib/macros
+	cd /usr/lib/macros; chmod 644 mmn;  chgrp bin mmn; chown bin mmn
+	cp strings.mm /usr/lib/macros
+	cd /usr/lib/macros; chmod 644 strings.mm;  chgrp bin strings.mm; chown bin strings.mm
+	cp mmt /usr/lib/macros
+	cd /usr/lib/macros; chmod 644 mmt;  chgrp bin mmt; chown bin mmt
+	cp vmca /usr/lib/macros
+	cd /usr/lib/macros; chmod 644 vmca;  chgrp bin vmca; chown bin vmca
+	cp an /usr/lib/macros
+	cd /usr/lib/macros; chmod 644 an;  chgrp bin an; chown bin an
+	cp ptx /usr/lib/macros
+	cd /usr/lib/macros; chmod 644 ptx;  chgrp bin ptx; chown bin ptx
+	cd shells.d;  make -f shells.mk ROOT= CH= install
+	cp mm.sh mm
+	cp mmt.sh mmt
+	:
+	if [ ! -d /usr/pub ] ; then rm -f /usr/pub;  \
+		mkdir /usr/pub;  chmod 755 /usr/pub;  fi
+	cp mm /usr/bin
+	cd /usr/bin; chmod 755 mm;  chgrp bin mm; chown bin mm
+	cp mmt /usr/bin
+	cd /usr/bin; chmod 755 mmt;  chgrp bin mmt; chown bin mmt
+	rm -f /usr/bin/mvt
+	ln /usr/bin/mmt /usr/bin/mvt
+	cd /usr/bin; chmod 755 mvt;  chgrp bin mvt; chown bin mvt
+	cp terminals /usr/pub
+	cd /usr/pub; chmod 664 terminals;  chgrp bin terminals; chown bin terminals
+	if [ ! -d /usr/lib/dwb ] ; then rm -f /usr/lib/dwb;  \
+		mkdir /usr/lib/dwb;  chmod 755 /usr/lib/dwb;  fi
+	if [ ! -d /usr/lib/dwb/samples ] ;  \
+		then rm -f /usr/lib/dwb/samples; \
+		mkdir /usr/lib/dwb/samples;  chmod 755 /usr/lib/dwb/samples;  fi
+	cp nroff.letter mm.report mm.sales mm.letter tbl.language tbl.bridges  tbl.pres eqn.stats troff.fonts troff.sizes troff.ad  troff.aeneid pic.forms /usr/lib/dwb/samples 
+	cd /usr/lib/dwb/samples; chmod 644 nroff.letter mm.report mm.sales mm.letter tbl.language tbl.bridges  tbl.pres eqn.stats troff.fonts troff.sizes troff.ad  troff.aeneid pic.forms; \
+		 chgrp bin nroff.letter mm.report mm.sales mm.letter tbl.language tbl.bridges  tbl.pres eqn.stats troff.fonts troff.sizes troff.ad  troff.aeneid pic.forms; chown bin nroff.letter mm.report mm.sales mm.letter tbl.language tbl.bridges  tbl.pres eqn.stats troff.fonts troff.sizes troff.ad  troff.aeneid pic.forms
+	cd eqn.d;  make -f eqn.mk ROOT= CH= install
+	yacc -d e.y
+
+conflicts: 147 shift/reduce
+	cc -O -c y.tab.c
+	rm y.tab.c
+	mv y.tab.o e.o
+	:
+	cmp -s y.tab.h e.def || cp y.tab.h e.def
+	cc -O -c main.c
+	cc -O -c diacrit.c
+	cc -O -c eqnbox.c
+	cc -O -c font.c
+	cc -O -c fromto.c
+	cc -O -c funny.c
+	cc -O -c glob.c
+	cc -O -c integral.c
+	cc -O -c io.c
+	cc -O -c lex.c
+	cc -O -c lookup.c
+	cc -O -c mark.c
+	cc -O -c matrix.c
+	cc -O -c move.c
+	cc -O -c over.c
+	cc -O -c paren.c
+	cc -O -c pile.c
+	cc -O -c shift.c
+	cc -O -c size.c
+	cc -O -c sqrt.c
+	cc -O -c text.c
+	cc  -s -n -o eqn main.o diacrit.o eqnbox.o font.o fromto.o funny.o  glob.o integral.o io.o lex.o lookup.o mark.o matrix.o move.o over.o paren.o  pile.o shift.o size.o sqrt.o text.o e.o -ly
+	:
+	cp eqn /usr/bin
+	cd /usr/bin; chmod 755 eqn;  chgrp bin eqn; chown bin eqn
+	cp apseqnchar /usr/pub
+	cd /usr/pub; chmod 644 apseqnchar;  chgrp bin apseqnchar; chown bin apseqnchar
+	cp cateqnchar /usr/pub
+	cd /usr/pub; chmod 644 cateqnchar;  chgrp bin cateqnchar; chown bin cateqnchar
+	rm -f /usr/pub/eqnchar
+	ln /usr/pub/apseqnchar /usr/pub/eqnchar
+	cd neqn.d; make -f neqn.mk ROOT= CH= install
+	yacc -d e.y
+
+conflicts: 85 shift/reduce, 71 reduce/reduce
+	cc -O -DNEQN -c y.tab.c
+	rm y.tab.c
+	mv y.tab.o e.o
+	cmp -s y.tab.h e.def || cp y.tab.h e.def
+	cc -O -DNEQN -c diacrit.c
+	cc -O -DNEQN -c eqnbox.c
+	cc -O -DNEQN -c font.c
+	cc -O -DNEQN -c fromto.c
+	cc -O -DNEQN -c funny.c
+	cc -O -DNEQN -c glob.c
+	cc -O -DNEQN -c integral.c
+	cc -O -DNEQN -c io.c
+	cc -O -DNEQN -c lex.c
+	cc -O -DNEQN -c lookup.c
+	cc -O -DNEQN -c mark.c
+	cc -O -DNEQN -c matrix.c
+	cc -O -DNEQN -c move.c
+	cc -O -DNEQN -c over.c
+	cc -O -DNEQN -c paren.c
+	cc -O -DNEQN -c pile.c
+	cc -O -DNEQN -c shift.c
+	cc -O -DNEQN -c size.c
+	cc -O -DNEQN -c sqrt.c
+	cc -O -DNEQN -c text.c
+	cc -s -n   -o neqn diacrit.o eqnbox.o font.o fromto.o funny.o glob.o integral.o  io.o lex.o lookup.o mark.o matrix.o move.o over.o paren.o  pile.o shift.o size.o sqrt.o text.o e.o -ly
+	:
+	cp neqn /usr/bin
+	cd /usr/bin; chmod 755 neqn;  chgrp bin neqn; chown bin neqn
+	cd tbl.d;  make -f tbl.mk ROOT= CH= install
+	:
+	cc -O -c t0.c
+	:
+	cc -O -c t1.c
+	:
+	cc -O -c t2.c
+	:
+	cc -O -c t3.c
+	:
+	cc -O -c t4.c
+	:
+	cc -O -c t5.c
+	:
+	cc -O -c t6.c
+	:
+	cc -O -c t7.c
+	:
+	cc -O -c t8.c
+	:
+	cc -O -c t9.c
+	:
+	cc -O -c tb.c
+	:
+	cc -O -c tc.c
+	:
+	cc -O -c te.c
+	:
+	cc -O -c tf.c
+	:
+	cc -O -c tg.c
+	:
+	cc -O -c ti.c
+	:
+	cc -O -c tm.c
+	:
+	cc -O -c tr.c
+	:
+	cc -O -c ts.c
+	:
+	cc -O -c tt.c
+	:
+	cc -O -c tu.c
+	:
+	cc -O -c tv.c
+	cc -n -O -s -o tbl t0.o t1.o t2.o t3.o t4.o t5.o t6.o t7.o t8.o t9.o tb.o tc.o te.o tf.o tg.o ti.o tm.o tr.o ts.o tt.o tu.o tv.o
+	cp tbl /usr/bin
+	cd /usr/bin; chmod 755 tbl;  chgrp bin tbl; chown bin tbl
+	cd checkmm.d; make -f checkmm.mk ROOT= CH= install
+	lex  chekl1.l
+2100/3000 nodes(%e), 5911/6000 positions(%p), 552/1000 (%n), 25032 transitions
+, 2683/3000 packed char classes(%k), 5978/6000 packed transitions(%a), 9162/10000 output slots(%o)
+	cc -O   -c lex.yy.c
+	rm lex.yy.c
+	mv lex.yy.o chekl1.o
+	cc -O   -c chekmain1.c
+	cc -O   -c chekrout1.c
+	cc -s  -n -o checkmm1 chekl1.o chekmain1.o chekrout1.o -ll -lPW
+	lex  chekl.l
+1272/1500 nodes(%e), 3869/4000 positions(%p), 333/1000 (%n), 24598 transitions
+, 1159/2000 packed char classes(%k), 2174/3000 packed transitions(%a), 3043/4000 output slots(%o)
+	cc -O   -c lex.yy.c
+	rm lex.yy.c
+	mv lex.yy.o chekl.o
+	cc -O   -c chekmain.c
+	cc -O   -c chekrout.c
+	cc -s   -n -o checkmm chekl.o chekmain.o chekrout.o -ll -lPW
+	:
+	cp checkmm /usr/bin
+	cd /usr/bin; chmod 755 checkmm;  chgrp bin checkmm; chown bin checkmm
+	cp checkmm1 /usr/bin
+	cd /usr/bin; chmod 755 checkmm1;  chgrp bin checkmm1; chown bin checkmm1
+	cd pic.d; make -f pic.mk ROOT= CH= install
+	yacc -d picy.y
+
+conflicts: 41 shift/reduce
+	mv y.tab.c picy.c
+	cc -O -c picy.c
+	lex picl.l
+1488/1500 nodes(%e), 4090/5000 positions(%p), 601/700 (%n), 32039 transitions
+, 96/120 packed char classes(%k), 1570/1700 packed transitions(%a), 1236/1500 output slots(%o)
+	mv lex.yy.c picl.c
+	cc -O -c picl.c
+	cc -O -c main.c
+	cc -O -c print.c
+	cc -O -c misc.c
+	cc -O -c symtab.c
+	cc -O -c blockgen.c
+	cc -O -c boxgen.c
+	cc -O -c circgen.c
+	cc -O -c arcgen.c
+	cc -O -c linegen.c
+	cc -O -c movegen.c
+	cc -O -c textgen.c
+	cc -O -c input.c
+	cc -O -c for.c
+	cc -O -c pltroff.c
+	cc -o pic   -s -n picy.o picl.o main.o print.o misc.o symtab.o blockgen.o boxgen.o circgen.o  arcgen.o linegen.o movegen.o textgen.o  input.o for.o pltroff.o -lm
+	cp pic /usr/bin
+	cd /usr/bin; chmod 755 pic;  chgrp bin pic; chown bin pic
+	cd macref.d; make -f macref.mk ROOT= CH= install
+	cc -O -c macref.c
+	cc -O -c macrform.c
+	cc -O -c macrstat.c
+	cc -O -c macrtoc.c
+	cc -O -c main.c
+	cc -O -c match.c
+	cc -s -n  -o macref macref.o macrform.o macrstat.o macrtoc.o main.o match.o 
+	:
+	cp macref /usr/bin
+	cd /usr/bin; chmod 755 macref;  chgrp bin macref; chown bin macref
+	cd ptx.d; make -f ptx.mk ROOT= CH= install
+	cc -O -s -n ptx.c -o ptx
+	cp eign.sh eign
+	cp ptx /usr/bin
+	cd /usr/bin; chmod 775 ptx;  chgrp bin ptx; chown bin ptx
+	cp eign /usr/lib
+	cd /usr/lib; chmod 644 eign;  chgrp bin eign; chown bin eign
+	cd grap.d; make -f grap.mk ROOT= CH= install
+	yacc -d -D grap.y
+
+conflicts: 37 shift/reduce
+	cc -O -c y.tab.c
+	rm y.tab.c
+	mv y.tab.o grap.o
+	cmp -s y.tab.h prevy.tab.h || cp y.tab.h prevy.tab.h
+	lex  grapl.l
+	cc -O -c lex.yy.c
+	rm lex.yy.c
+	mv lex.yy.o grapl.o
+	cc -O -c main.c
+	cc -O -c input.c
+	cc -O -c print.c
+	cc -O -c frame.c
+	cc -O -c for.c
+	cc -O -c coord.c
+	cc -O -c ticks.c
+	cc -O -c plot.c
+	cc -O -c label.c
+	cc -O -c misc.c
+	cc -o grap   -s -n grap.o grapl.o main.o input.o print.o frame.o for.o coord.o ticks.o plot.o label.o misc.o  -lm
+	cp grap /usr/bin
+	cd /usr/bin; chmod 755 grap;  chgrp bin grap; chown bin grap
+	cd subndx.d; make -f subndx.mk ROOT= CH= install
+	if [ ! -d /usr/lib/dwb ] ; then rm -f /usr/lib/dwb; \
+		mkdir /usr/lib/dwb;  chmod 755 /usr/lib/dwb;  fi
+	lex  sbj1.l
+600/700 nodes(%e), 1892/2000 positions(%p), 279/300 (%n), 18666 transitions
+, 899/1000 packed char classes(%k), 2537/3000 packed transitions(%a), 4595/5000 output slots(%o)
+	cc  -c lex.yy.c
+	rm lex.yy.c
+	mv lex.yy.o sbj1.o
+	cc -O -s -n sbj1.o -ll -o sbj1
+	lex  sbj2.l
+	cc  -c lex.yy.c
+	rm lex.yy.c
+	mv lex.yy.o sbj2.o
+	cc  -c case.c
+	cc -O -s -n sbj2.o case.o -ll -o sbj2
+	lex  sbj3.l
+	cc  -c lex.yy.c
+	rm lex.yy.c
+	mv lex.yy.o sbj3.o
+	cc  -c omit.c
+	cc -O -s -n sbj3.o case.o omit.o -ll -o sbj3
+	lex  nwords.l
+627/1000 nodes(%e), 2461/3000 positions(%p), 255/500 (%n), 10572 transitions
+, 498/1000 packed char classes(%k), 3226/3300 packed transitions(%a), 4417/4500 output slots(%o)
+	cc  -c lex.yy.c
+	rm lex.yy.c
+	mv lex.yy.o nwords.o
+	cc -O -s -n nwords.o -ll -o style1
+	lex  end.l
+	cc  -c lex.yy.c
+	rm lex.yy.c
+	mv lex.yy.o end.o
+	cc -O -s -n end.o -ll -o style2
+	lex  part.l
+	cc  -c lex.yy.c
+	rm lex.yy.c
+	mv lex.yy.o part.o
+	cc  -c pscan.c
+	cc  -c outp.c
+	cc  -c extern.c
+	cc -O -s -n part.o pscan.o outp.o extern.o -ll -o style3
+	cc  -c deroff.c
+Assembler: deroff.c
+	aline 4989	: Warning: Table overflow: some optimizations lost (Labels)
+	cc -O -s -n deroff.o -i -o deroff
+	cp parts.sh parts
+	cp subj.sh subj
+	lex  ndexer.l
+	cc  -c lex.yy.c
+	rm lex.yy.c
+	mv lex.yy.o ndexer.o
+	cc  -c rootwd.c
+	cc  -c str.c
+	cc  -c strr.c
+	cc  -c space.c
+	cc -O -s -n ndexer.o rootwd.o str.o strr.o case.o space.o -ll -i -o ndexer
+	cc -O -s -n pages.c -o pages
+	cc -O -s -n ndxformat.c -o ndxformat
+	cc -O -s -n sbjprep.c -o sbjprep
+	cp ndx.sh ndx
+	cp sbj1 /usr/lib/dwb
+	cd /usr/lib/dwb; chmod 755 sbj1;  chgrp bin sbj1; chown bin sbj1
+	cp sbj2 /usr/lib/dwb
+	cd /usr/lib/dwb; chmod 755 sbj2;  chgrp bin sbj2; chown bin sbj2
+	cp sbj3 /usr/lib/dwb
+	cd /usr/lib/dwb; chmod 755 sbj3;  chgrp bin sbj3; chown bin sbj3
+	cp subj /usr/bin
+	cd /usr/bin; chmod 775 subj;  chgrp bin subj; chown bin subj
+	cp ndx /usr/bin
+	cd /usr/bin; chmod 775 ndx;  chgrp bin ndx; chown bin ndx
+	cp ndexer /usr/lib/dwb
+	cd /usr/lib/dwb; chmod 755 ndexer;  chgrp bin ndexer; chown bin ndexer
+	cp pages /usr/lib/dwb
+	cd /usr/lib/dwb; chmod 755 pages;  chgrp bin pages; chown bin pages
+	cp ndxformat /usr/lib/dwb
+	cd /usr/lib/dwb; chmod 755 ndxformat;  chgrp bin ndxformat; \
+	chown bin ndxformat
+	cp sbjprep /usr/lib/dwb
+	cd /usr/lib/dwb; chmod 755 sbjprep;  chgrp bin sbjprep;\
+	chown bin sbjprep
+	cp parts /usr/lib/dwb
+	cd /usr/lib/dwb; chmod 775 parts;  chgrp bin parts; chown bin parts
+	cp style1 /usr/lib/dwb
+	cd /usr/lib/dwb; chmod 755 style1;  chgrp bin style1; chown bin style1
+	cp style2 /usr/lib/dwb
+	cd /usr/lib/dwb; chmod 755 style2;  chgrp bin style2; chown bin style2
+	cp style3 /usr/lib/dwb
+	cd /usr/lib/dwb; chmod 755 style3;  chgrp bin style3; chown bin style3
+	cp deroff /usr/bin
+	cd /usr/bin; chmod 755 deroff;  chgrp bin deroff; chown bin deroff
+	cp diffmk.sh diffmk
+	cc -O -s -n hyphen.c -o hyphen
+	cc -O -s -n col.c -o col
+	:
+	cp diffmk /usr/bin
+	cd /usr/bin; chmod 775 diffmk;  chgrp bin diffmk; chown bin diffmk
+	cp hyphen /usr/bin
+	cd /usr/bin; chmod 775 hyphen;  chgrp bin hyphen; chown bin hyphen
+	cp col /usr/bin
+	cd /usr/bin; chmod 775 col;  chgrp bin col; chown bin col
+Thu Jun 25 15:11:42 PDT 1987

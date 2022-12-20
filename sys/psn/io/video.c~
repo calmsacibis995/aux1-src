@@ -1,0 +1,1017 @@
+#ifndef lint	/* .../sys/psn/io/video.c */
+#define _AC_NAME video_c
+#define _AC_NO_MAIN "%Z% Copyright (c) 1987 Apple Computer, Inc., All Rights Reserved.  {Apple version %I% %E% %U%}"
+#include <apple_notice.h>
+
+#ifdef _AC_HISTORY
+  static char *sccsid = "%Z%Copyright Apple Computer 1987\tVersion %I% of %M% on %E% %U%";
+#endif		/* _AC_HISTORY */
+#endif		/* lint */
+
+#define _AC_MODS
+/*	@(#)video.c	UniPlus VVV.2.1.32	*/
+/*
+ * (C) 1986 UniSoft Corp. of Berkeley CA
+ *
+ * UniPlus Source Code. This program is proprietary
+ * with Unisoft Corporation and is not to be reproduced
+ * or used in any manner except as authorized in
+ * writing by Unisoft.
+ */
+
+/*
+ *	Note the define OLDVIDEO - this is for support of
+ *		some of the features of the (really) old 
+ *		video cards which no one is using
+ *		these days. This code has been left in as
+ *		some of the features (such as dimming
+ *		etc) may be usefull in the future
+ *
+ */
+
+#define MACOS_DIRECTORY	1	/* Slot resource directory for mac drivers */
+#define AUX_DIRECTORY	3	/* Slot resource directory for aux drivers */
+
+#define	VIDEO_NGC_1_0	5	/* the Apple NuBus Graphics card */
+
+#include "sys/types.h"
+#include "sys/errno.h"
+#include "sys/param.h"
+#include "sys/dir.h"
+#include "sys/signal.h"
+#include "sys/uconfig.h"
+#include "sys/sysmacros.h"
+#include "sys/reg.h"
+#include "sys/mmu.h"
+#include "sys/page.h"
+#include "sys/seg.h"
+#include "sys/systm.h"
+#include "sys/time.h"
+#include "sys/user.h"
+#include "sys/video.h"
+#include "setjmp.h"
+#include "sys/stream.h"
+#include "sys/via6522.h"
+#include "sys/debug.h"
+#include "sys/module.h"
+#include "sys/key.h"
+#include "apple/slots.h"
+
+extern struct key_data key_data;
+extern struct mouse_data mouse_data;
+
+/*
+ *	Defines for the OLD video card
+ */
+
+#define VID_DIM		0x0
+#define VID_PAGE00	0x4
+#define VID_PAGE02	0x8
+#define VID_MODE00	0x8
+#define VID_MODE02	0x4
+#define VID_INT		0xc
+
+/*
+ *	CLUT table change requests
+ */
+
+#define CLUT_WRITE	0		/* just write it from the table */
+#define CLUT_NOW	1		/* update the table and the clut */
+#define CLUT_UPDATE	2		/* update the table and make the
+					   clut change on vtrace */
+
+/*
+ *	Local storage
+ */
+
+struct video *video_desc[NSCREENS];	/* pointer to video board description */
+struct video *video_index[16];		/* how to find it by slot number */
+int video_count = 0;			/* number of video boards */
+int video_key_count = 0;		/* the keyboard count */
+static struct video video[NSCREENS];	/* their attributes */
+
+
+/*
+ *	The following is for automatic device dimming (not supported on all
+ *			devices)
+ */
+
+#define DEFAULT_DIMTIME 	10		/* minutes */
+
+/*
+ *	Local static defines
+ */
+
+static video_ioctl();
+static video_func();
+static video_dimmer();
+int video_clear();
+static video_dim();
+static video_undim();
+static video_setpage();
+static video_find();
+static video_setcolor();
+static video_setinit();
+
+/*
+ *	NGC initialisation table
+ */
+
+static unsigned char ngc_init[] = {
+	0xdf, 0xb8, 0xff, 0xff, 0xe1, 0x1a, 0x88, 0xb9,
+	0xfa, 0xfd, 0xfd, 0xfe, 0xf0, 0xbe, 0xfa, 0x37,
+};
+
+/*
+ *	bit/pixel initialisation tables
+ */
+
+#ifdef NOOFFSET
+static unsigned char ngc_bits[] = {
+	0x20, 0x47, 0x00, 0x00, 0x1e, 0xe5, 0x77, 0x46,
+	0x05, 0x02, 0x02, 0x01, 0x0f, 0x41, 0x05, 0xc8,
+};
+#else NOOFFSET
+static unsigned char ngc_bits[] = {
+	0x20, 0x47, 0x00, 0x08, 0x1e, 0xe5, 0x77, 0x46,
+	0x05, 0x02, 0x02, 0x01, 0x0f, 0x41, 0x05, 0xc8,
+};
+#endif NOOFFSET
+
+/*
+ *	Default screen color
+ */
+
+static struct video_color black_white = {
+	{ 0xffff, 0xffff, 0xffff},
+	{ 0x0000, 0x0000, 0x0000},
+};
+
+/*
+ *	Video Interrupt Handler
+ */
+
+
+static
+video_intr(args)
+struct args *args;
+{
+	register int i;
+	register struct video *vp;
+
+	vp = video_index[args->a_dev];
+	if (vp == NULL)
+		panic("video interrupt");
+
+	/*
+	 *	Clear the interrupt
+	 *	If this is a one-shot turn it back off
+	 */
+
+	switch(vp->video_type) {
+	case VIDEO_1003_00:
+	case VIDEO_1003_02:
+		*vp->video_cmd = VID_INT+vp->video_page;
+		break;
+
+	case VIDEO_NGC_1_0:
+		((struct ngc *)vp->video_base)->ngc_intr = 0;
+		if (vp->video_intstate == 2) {
+			((struct ngc *)vp->video_base)->ngc_disi = 0;
+			vp->video_intstate = 0;
+		}
+		break;
+	default:
+		(*vp->video_driver)(vp->video_slot, VR_CLEAR);
+		if (vp->video_intstate == 2) {
+			(*vp->video_driver)(vp->video_slot, VR_DISABLE);
+			vp->video_intstate = 0;
+		}
+		break;
+	}
+
+	/*
+	 *	If we have to update the CLUT then do it
+	 */
+
+	if (vp->video_request) {
+		vp->video_request = 0;
+		video_setcolor(vp, CLUT_WRITE, NULL);
+	}
+
+	/*
+	 *	If required call a service routine
+	 */
+
+	if (vp->video_intr)
+		(*vp->video_intr)(vp);
+}
+
+/*
+ *	video initialisation routine. First call video_find to probe the slots
+ *	for video boards (we can't do this via autoconfig as we need the screen
+ *	to come up and run autoconfig .... chicken and egg problem). Next we
+ *	set up the video device descriptor and initialise the device. Finally
+ *	we clear the screen.
+ */
+
+video_init(ubase)
+long *ubase;
+{
+	register struct video *vp;
+	register int i;
+	struct ngc *ngcp;
+	extern	int	screen_image[];
+
+	for (vp = video, i = 0; i < NSCREENS; vp++, i++)
+		video_desc[i] = vp;
+	video_count = 0;
+	video_find(ubase);
+	for (vp = video, i = 0; i < video_count; vp++, i++) {
+		vp->video_timeout = DEFAULT_DIMTIME;
+		vp->video_off = i;
+		vp->video_intr = 0;
+		vp->video_color = black_white;
+#ifndef PMMU
+		vp->video_base = (caddr_t)sptalloc(btop(4*64*1024),
+				PG_V|PG_RW, btop((unsigned)(vp->video_base)));
+		if (vp->video_base == 0)
+			panic("video ram sptalloc failed");
+#endif PMMU
+		switch (vp->video_type) {
+#ifdef OLDVIDEO
+		case VIDEO_1003_00:
+		case VIDEO_1003_02:
+			vp->video_key = &key_data;
+			vp->video_key_ind = video_key_count;
+			vp->video_mouse = &mouse_data;
+			vp->video_mouse_ind = video_key_count;
+			video_key_count++;
+			vp->video_ioctl = video_ioctl;
+			vp->video_func = video_func;
+#ifndef PMMU
+			vp->video_cmd = (char *)sptalloc(1, PG_V|PG_RW,
+				btop((unsigned)(vp->video_addr+0x00880000)));
+			if (vp->video_cmd == 0)
+				panic("video command sptalloc failed");
+#else
+			vp->video_cmd = vp->video_addr+0x00880000;
+#endif PMMU
+			vp->video_addr = vp->video_base;
+			*vp->video_cmd = (vp->video_type == VIDEO_1003_00 ?
+					VID_MODE00 : VID_MODE02) | 1;
+			video_setpage(vp, 0);
+			video_clear(vp, 1);
+			video_setpage(vp, 1);
+			video_clear(vp, 1);
+			video_setpage(vp, 2);
+			video_clear(vp, 1);
+			video_setpage(vp, 3);
+			video_clear(vp, 1);
+			video_undim(vp);
+			viamkslotintr(vp->video_slot, video_intr, 0);
+			timeout(video_dimmer, vp, 60*HZ);
+			break;
+#endif OLDVIDEO
+		default:
+
+			/*
+			 *	Assume PMMU .... MMB map in cost too much
+			 */
+
+			vp->video_key = &key_data;
+			vp->video_key_ind = video_key_count;
+			vp->video_mouse = &mouse_data;
+			vp->video_mouse_ind = video_key_count;
+			video_key_count++;
+			vp->video_ioctl = video_ioctl;
+			vp->video_func = video_func;
+#ifndef PMMU
+			panic("NGC PMMU setup");
+#endif PMMU
+			if (vp->video_type == VIDEO_NGC_1_0) {
+				video_setinit((struct ngc *)(vp->video_base));
+				video_setcolor(vp, CLUT_NOW, &black_white);
+			}
+			viamkslotintr(vp->video_slot, video_intr, 1);
+			break;
+		}
+	}
+}
+
+/*
+ *	Clear the screen
+ */
+
+video_clear(vp, value)
+struct video *vp;
+{
+	register int i, lines, width, inc;
+	register char *cp;
+
+	if (value)
+		value = 0xffffffff;
+	cp = vp->video_addr;
+	lines = vp->video_scr_y - 1;
+	width = (vp->video_scr_x+(8*sizeof(long))-1)/(8*sizeof(long)) - 1;
+	inc = (vp->video_mem_x/(8*sizeof(long)) - width - 1)*sizeof(long);
+	do {
+		i = width;
+		do {
+			*(long *)cp = value;
+			cp += sizeof(long);
+		} while(i--);
+		cp += inc;
+	} while (lines--);
+}
+
+/*
+ *	Fill the screen with a bit map.	NOTE: it is assumed that the screen size is
+ *		in multiples of 8 bits
+ */
+
+
+video_bitmap(vp)
+register struct video *vp;
+{
+	register int i,j,k,l;
+	extern unsigned char screen_feature1[];
+	extern unsigned char screen_feature2[];
+	extern unsigned char screen_feature3[];
+	extern unsigned char screen_feature4[];
+	extern unsigned char screen_feature5[];
+	extern unsigned char screen_feature6[];
+	extern unsigned char screen_feature7[];
+	extern unsigned char screen_feature8[];
+	extern unsigned char screen_feature9[];
+	extern unsigned char screen_feature10[];
+	extern unsigned char screen_feature11[];
+
+	video_clear(vp, 0);
+	vwrite(vp, screen_feature1, 0, 0, 224, 24);			/* menu bar LHS */
+	j = 224;
+	l = (vp->video_scr_x - 224)/8;
+	for (i = 0; i < l;i ++) {
+		vwrite(vp, screen_feature6, j, 0, 8, 24);		/* menu middle */
+		j += 8;
+	}
+	j = 8;
+	l = (vp->video_scr_x - 16)/8;
+	for (i = 0; i < l;i ++) {
+		vwrite(vp, screen_feature8, j, 24, 8, 24);		/* window header */
+		j += 8;
+	}
+	vwrite(vp, screen_feature7, (vp->video_scr_x-256)/2, 24, 256, 24);/* window name */
+	vwrite(vp, screen_feature2, vp->video_scr_x-8, 0, 8, 48);/* menu RHS */
+	vwrite(vp, screen_feature3, 0, 24, 8, 24);			/* window top left */
+	l = (vp->video_scr_y - 48 - 8)/2;
+	j = 48;
+	k = vp->video_scr_x-16;
+	for (i = 0; i < l; i++) {
+		vwrite(vp, screen_feature4, 0, j, 16, 2);		/* LHS */
+		vwrite(vp, screen_feature5, k, j, 16, 2);		/* RHS */
+		j += 2;
+	}
+	j = 8;
+	l = (vp->video_scr_x - 16)/8;
+	k = vp->video_scr_y-12;
+	for (i = 0; i < l; i++) {
+		vwrite(vp, screen_feature9, j, k, 8, 12);		/* bottom */
+		j += 8;
+	}
+	vwrite(vp, screen_feature10, 0, k, 8, 12);			/* bottom left */
+	vwrite(vp, screen_feature11, vp->video_scr_x-8, k, 8, 12);/* bottom right */
+}
+
+/*
+ *	block blitter for writing screen features
+ */
+
+static
+vwrite(vp, d, x, y, len, height)
+struct video *vp;
+register unsigned char *d;
+int x, y, len, height;
+{
+	register int inc, i, j, width, w1;
+	register unsigned char *cp;
+
+	cp = (unsigned char *)vp->video_addr + ((vp->video_mem_x*y)>>3) + (x>>3);
+	inc = (vp->video_mem_x - len)>>3;
+	width = len/(8*sizeof(unsigned char));
+	w1 = width&~(sizeof(long)-1);
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < w1; j += sizeof(long)) {
+			*(long *)cp = *(long *)d;
+			cp += sizeof(long);
+			d += sizeof(long);
+		}
+		for (; j < width; j++) {
+			*cp++ = *d++;
+		}
+		cp += inc;
+	}
+}
+
+
+/*
+ *	perform device dependant functions to the screen (this is called via
+ *	a pointer in the descriptor so that other people can write their own
+ *	versions of this routine). Not all functions are supported by all
+ *	devices.
+ */
+
+static 
+video_func(vp, code, p1)
+struct video *vp;
+int code;
+{
+	register int s;
+	register int ret;
+
+	ret = 0;
+	s = spl2();
+	switch(code) {
+	case VF_CLEAR:
+
+		/*
+		 *	clear the screen
+		 */
+
+		video_clear(vp, p1);
+		break;
+
+#ifdef OLDVIDEO
+	case VF_SETPAGE:
+
+		/*
+		 *	set the displayed page
+		 */
+
+		video_setpage(vp, p1);
+		break;
+
+	case VF_DIM:
+
+		/*
+		 *	dim the screen
+		 */
+
+		video_dim(vp);
+		break;
+
+	case VF_UNDIM:
+
+		/*
+		 *	undim the screen
+		 */
+
+		video_undim(vp);
+		break;
+#endif OLDVIDEO
+
+	case VF_ENABLE:
+
+		/*
+		 *	turn on vertical retrace interrupts
+		 */
+
+		switch(vp->video_type) {
+#ifdef OLDVIDEO
+		case VIDEO_1003_00:
+		case VIDEO_1003_02:
+			break;
+#endif OLDVIDEO
+		case VIDEO_NGC_1_0:
+			((struct ngc *)vp->video_base)->ngc_intr = 0;
+			break;
+		default:
+			(*vp->video_driver)(vp->video_slot, VR_ENABLE);
+		}
+		vp->video_intstate = 1;
+		break;
+
+	case VF_ONCE:
+
+		/*
+		 *	turn on vertical retrace for at least one intr
+		 */
+
+		switch(vp->video_type) {
+#ifdef OLDVIDEO
+		case VIDEO_1003_00:
+		case VIDEO_1003_02:
+			break;
+#endif OLDVIDEO
+		case VIDEO_NGC_1_0:
+			((struct ngc *)vp->video_base)->ngc_intr = 0;
+			break;
+		default:
+			(*vp->video_driver)(vp->video_slot, VR_ENABLE);
+		}
+		vp->video_intstate = 2;
+		break;
+
+	case VF_DISABLE:
+
+		/*
+		 *	turn off vertical retrace interrupts
+		 */
+
+		if (vp->video_request) {
+			vp->video_intstate = 2;
+		} else {
+			switch(vp->video_type) {
+#ifdef OLDVIDEO
+			case VIDEO_1003_00:
+			case VIDEO_1003_02:
+				break;
+#endif OLDVIDEO
+			case VIDEO_NGC_1_0:
+				((struct ngc *)vp->video_base)->ngc_intr = 0;
+				break;
+			default:
+				(*vp->video_driver)(vp->video_slot, VR_DISABLE);
+			}
+			vp->video_intstate = 0;
+		}
+		break;
+
+	case VF_VINTR:
+
+		/*
+		 *	return 1 if we are currently doing a vertical retrace
+		 */
+
+		if (vp->video_type == VIDEO_NGC_1_0) {
+			ret = ((struct ngc *)vp->video_base)->ngc_vsync&1;
+		} else {
+			ret = 1;
+		}
+		break;
+	}
+	splx(s);
+	return(ret);
+}
+
+#ifdef OLDVIDEO
+/*
+ *	dim the screen
+ */
+
+static
+video_dim(vp)
+struct video *vp;
+{
+	switch(vp->video_type) {
+	case VIDEO_1003_00:
+	case VIDEO_1003_02:
+		*vp->video_cmd = VID_DIM|1;
+		break;
+	case VIDEO_NGC_1_0:
+	default:
+		break;
+	}
+	vp->video_dimmed = 1;
+}
+
+/*
+ *	undim the screen
+ */
+
+static
+video_undim(vp)
+struct video *vp;
+{
+	switch(vp->video_type) {
+	case VIDEO_1003_00:
+	case VIDEO_1003_02:
+		*vp->video_cmd = VID_DIM|0;
+		break;
+	case VIDEO_NGC_1_0:
+	default:
+		break;
+	}
+	vp->video_dimmed = 0;
+	vp->video_dimtime = vp->video_timeout;
+}
+
+/*
+ *	this is the timeout routine that dims the screen
+ */
+
+static
+video_dimmer(vp)
+struct video *vp;
+{
+	if (!vp->video_dimmed && vp->video_dimtime != 0xffffffff)
+	if (vp->video_dimtime) {
+		vp->video_dimtime--;
+	} else {
+		video_dim(vp);
+	}
+	timeout(video_dimmer, vp, 60*HZ);
+}
+
+/*
+ *	set the current page
+ */
+
+static
+video_setpage(vp, page)
+struct video *vp;
+{
+	switch(vp->video_type) {
+	case VIDEO_1003_00:
+	case VIDEO_1003_02:
+		if (page >= 0 && page <= 3) {
+			*vp->video_cmd = (vp->video_type == VIDEO_1003_00 ?
+				VID_PAGE00 : VID_PAGE02) + page;
+			vp->video_addr = vp->video_base + page*64*1024;
+		}
+		break;
+	case VIDEO_NGC_1_0:
+	default:
+		break;
+	}
+	vp->video_page = page;
+}
+#endif OLDVIDEO
+
+/*
+ *	This is a video driver that doesn't do anything.
+ */
+
+static
+video_nulldriver()
+{
+}
+
+/*
+ *	Autoconfig video cards (chicken/egg problem: needed because we have
+ *		to come up with a console before we can autoconfig)
+ *
+ *	Ok, now a word about video drivers:
+ *		We support three kinds of video drivers (yeah!)
+ *		1) Toby cards don't have a driver in ROM.
+ *		2) Current E-Machines and SuperMac cards have a video
+ *			driver in the Mac driver directory.
+ *		3) New cards (like Kong) have a video driver in the A/UX
+ *			directory.  For these drivers, the VR_INIT routine is
+ *			expected to return the mode which is the id used to
+ *			find the video parameter block.
+ *			version number before the code for the driver.
+ *	Notes:
+ *		1) For the first two types, the id used to find the video
+ *			parameter block is always 0x80.
+ *		2) The new style video driver has a 3 long-word header:
+ *			a) a version number
+ *			b) the number of bytes the driver needs for locals
+ *			c) reserved for future  (Must be 0 for now)
+ */
+
+static
+video_find(ubase)
+long *ubase;
+{
+	register long slot;
+	register struct video *vp;
+	register struct auto_data *adp;
+	long len;
+	caddr_t p;
+	int l;
+	struct video_data *video_data;
+	int driver_directory;		/* MACOS_DIRECTORY or AUX_DIRECTORY */
+	int video_parameter_id = 0x80;	/* id to find video parameter block */
+	int driver_id;			/* id to find video driver */
+
+	vp = &video[video_count];
+	adp = (struct auto_data *)AUTO_ADDR;
+	if (adp->auto_magic != AUTO_MAGIC) {
+		printf("Warning: No Video Board Found\n");
+		return;
+	}
+	l = 0;
+	p = (caddr_t)ptob(*ubase);
+
+	/*
+	 *	Search through the slots looking for a video board
+	 */
+
+	for (slot = SLOT_LO; slot <= SLOT_HI && video_count < NSCREENS; slot++) {
+
+		/*
+		 *	If it isn't a video card, ignore it.  Otherwise, get the
+		 *		size stuff from the video parameter block.  If it's
+		 *		not an Apple card, get the driver from ROM as well.
+		 */
+
+		vp->video_base = vp->video_addr = (char *)(0xf0000000 | (slot<<24));
+		if ((driver_directory = video_slot_walk(slot,&driver_id)) == 0)
+			continue;		/* it isn't a video board */
+		if (adp->auto_id[slot] != VIDEO_NGC_1_0) {
+			if (video_get_ind(driver_id, 4, 3, slot, p, 4096) == -1) {
+				vp->video_driver = video_nulldriver;
+				printf("Warning: no video driver for slot %d\n",slot);
+			} else {
+				if (driver_directory == MACOS_DIRECTORY) {
+					vp->video_driver = (int(*)()) &((struct rsrc_blk *)p)->rblk_data[0];
+					(void) (*vp->video_driver)(slot,VR_INIT);
+				} else {
+					vp->video_driver = (int(*)()) &((struct rsrc_blk *)p)->rblk_data[3];
+					video_parameter_id = (*vp->video_driver)(slot,VR_INIT);
+				}
+				len = ((struct rsrc_blk *)p)->rblk_size;
+				l += len;
+				p += len;
+			}
+		}
+		if (video_get_ind(driver_id, video_parameter_id, 1, slot, p, sizeof(*video_data) + sizeof(long)) == -1)
+			continue;
+		video_data = (struct video_data *) (p + sizeof(long));
+		vp->video_data = *video_data;
+		vp->video_mem_x = 8*video_data->v_rowbytes;
+		vp->video_mem_y = video_data->v_bottom - video_data->v_top;
+		vp->video_scr_x = video_data->v_right - video_data->v_left;
+		vp->video_scr_y = video_data->v_bottom - video_data->v_top;
+#ifndef NOOFFSET
+		vp->video_addr += video_data->v_baseoffset;
+#endif NOOFFSET
+		video_index[slot] = vp;
+		vp->video_slot = slot;
+		vp->video_type = adp->auto_id[slot];
+		video_count++;
+		vp++;
+	}
+
+	/*
+	 *	Update the space 'stolen'
+	 */
+
+	if (l)
+		*ubase = btop(ptob(*ubase)+l);
+
+	/*
+	 *	warn us if we are in trouble
+	 */
+
+	if (video_count == 0)
+		printf("Warning: No Video Board Found\n");
+}
+
+/*
+ *	This routine is called from below to do various ioctls (not all of
+ *	which are supported on all cards
+ */
+
+static
+video_ioctl(vp, iocbp, m)
+struct video *vp;
+struct iocblk *iocbp;
+mblk_t *m;
+{
+	register struct ngc *ngcp;
+	register int i;
+	register unsigned char *cp;
+	register mblk_t *m1;
+
+	switch(iocbp->ioc_cmd) {
+	case VIDEO_DIM:
+
+	/*
+	 *	Set the dim timeout (in seconds)
+	 */
+
+		switch(vp->video_type) {
+#ifdef OLDVIDEO
+		case VIDEO_1003_00:
+		case VIDEO_1003_02:
+		    	if (iocbp->ioc_count != sizeof(long)) 
+				return(1);
+			vp->video_timeout = *(long *)m->b_cont->b_rptr;
+			if (vp->video_timeout == 0)
+				vp->video_timeout = 0xffffffff;
+			iocbp->ioc_count = 0;
+			freemsg(unlinkb(m));
+			return(0);
+#endif OLDVIDEO
+		default:
+			return(1);
+		}
+
+	case VIDEO_SETCOLOR:
+		switch(vp->video_type) {
+#ifdef OLDVIDEO
+		case VIDEO_1003_00:
+		case VIDEO_1003_02:
+			return(1);
+#endif OLDVIDEO
+		case VIDEO_NGC_1_0:
+		default:
+			if (iocbp->ioc_count != sizeof(struct video_color))
+				return(1);
+			video_setcolor(vp, CLUT_UPDATE, m->b_cont->b_rptr);
+			iocbp->ioc_count = 0;
+			freemsg(unlinkb(m));
+			return(0);
+		}
+
+	case VIDEO_SETDEF:
+
+		/*
+		 *	return the board to its default settings
+		 */
+
+		freemsg(unlinkb(m));
+		switch(vp->video_type) {
+#ifdef OLDVIDEO
+		case VIDEO_1003_00:
+		case VIDEO_1003_02:
+			return(1);
+#endif OLDVIDEO
+		case VIDEO_NGC_1_0:
+			video_setinit((struct ngc *)(vp->video_base));
+			video_setcolor(vp, CLUT_NOW, &black_white);
+			iocbp->ioc_count = 0;
+			return(0);
+		default:
+			(*vp->video_driver)(vp->video_slot, VR_INIT);
+			iocbp->ioc_count = 0;
+			return(0);
+		}
+
+	default:
+		return(1);
+	}
+}
+
+/*
+ *	This initialises the Apple TFB after a reset
+ */
+
+static
+video_setinit(ngcp)
+register struct ngc *ngcp;
+{
+	register int i;
+	register unsigned char *cp;
+
+	for (i = 15; i >= 0; i--) {
+		ngcp->ngc_tfbi[i].x = ngc_init[15-i];
+	}
+	cp = ngc_bits;
+	ngcp->ngc_tfb[15].x = 0xb7;
+	for (i = 0; i < 16; i++)
+		ngcp->ngc_tfb[i].x = ~*cp++;
+}
+
+/*
+ *	This routine sets up the device's colour table for the colous values passed in
+ */
+
+#define NGC_COLOR(x) (x>>8)		/* only the top 8 bits are significant */
+
+static
+video_setcolor(vp, flag, color)
+register struct video *vp;
+struct video_color *color;
+{
+	register int j;
+	register char r, g, b;
+	register char *cp1;
+	register struct ngc *ngcp;
+
+
+	if (flag != CLUT_WRITE)
+		vp->video_color = *color;
+
+	/*
+	 *	zap it at the CLUT
+	 */
+
+	if (flag == CLUT_WRITE || flag == CLUT_NOW) {
+		switch(vp->video_type) {
+#ifdef OLDVIDEO
+		case VIDEO_1003_00:
+		case VIDEO_1003_02:
+			return;
+#endif OLDVIDEO
+		case VIDEO_NGC_1_0:
+			ngcp = (struct ngc *)vp->video_base;
+			cp1 = &ngcp->ngc_clut.palette;
+			r = ~NGC_COLOR(vp->video_color.color[1].red);
+			g = ~NGC_COLOR(vp->video_color.color[1].green);
+			b = ~NGC_COLOR(vp->video_color.color[1].blue);
+			ngcp->ngc_clut.addr = 0xff;
+			for (j = 0; j < 128; j++) {
+				*cp1 = r;
+				*cp1 = g;
+				*cp1 = b;
+			}
+			r = ~NGC_COLOR(vp->video_color.color[0].red);
+			g = ~NGC_COLOR(vp->video_color.color[0].green);
+			b = ~NGC_COLOR(vp->video_color.color[0].blue);
+			for (j = 0; j < 128; j++) {
+				*cp1 = r;
+				*cp1 = g;
+				*cp1 = b;
+			}
+			break;
+		default:
+			(*vp->video_driver)(vp->video_slot, VR_COLOR, &vp->video_color);
+			break;
+		}
+	} else {
+
+		/*
+		 *	wait for the next interrupt before writing
+		 */
+
+		vp->video_request = 1;
+		video_func(vp, VF_ONCE, 0);
+	}
+	return(1);
+}
+
+static
+video_get_ind(k1, k2, k3, slot, buffer, size)
+int k1, k2, k3;		/* Vendor information type */
+int slot;		/* Slot number or ROM base address */
+char *buffer;		/* String buffer */
+int size;		/* The size of the buffer */
+{
+	struct rom_idoffset venlist[LISTLEN];
+				/* The vendor list storage area */
+	register char *romp;	/* A ROM pointer */
+	register int i;		/* A loop counter */
+	unsigned address;	/* The calculated ROM base address */
+
+	/*
+	 * Create the ROM base address
+	 */
+
+	if((address = slot_address(slot)) == 0)
+		return(-1);
+
+	if((romp = slot_resource(address, k1, k2, 
+			venlist, LISTLEN*sizeof(struct rom_idoffset))) == 0)
+		return(-1);
+
+	/*
+	 * Search the vendor information list for the "kind" item.
+	 */
+
+	for(i = 0; ((i < LISTLEN) && (venlist[i].r_id != RD_EOLIST)); i++)
+		if(venlist[i].r_id == k3) 
+			break;
+
+	if((i == LISTLEN) || (venlist[i].r_id == RD_EOLIST))
+	    	return(-1);
+
+	/*
+	 * move romp forward in the structure so that it points at the
+	 * the vendor list entry in the structure in ROM.
+	 */
+
+	romp = slot_calc_pointer(romp, i*sizeof(struct rom_idoffset));
+
+	/*
+	 * Then read the vendor information buffer requested.
+	 */
+
+	return(slot_structure(romp, venlist[i].r_offset, buffer, size));
+}
+
+/*
+ *	Walk the major slot directory looking for a video entry
+ */
+
+static
+int video_slot_walk(slot,id)
+int slot;
+int *id;
+{
+	unsigned short res[4];		/* the type entry */
+	struct rom_idoffset rd[10];	/* space for the resource data */
+	register int j;
+	register unsigned address;	/* The calculated ROM base address */
+
+	if((address = slot_address(slot)) == 0)
+		return(0);
+	slot_directory(address, rd, 10);
+	for(j = 0; ((j < 10) && (rd[j].r_id != RD_EOLIST)); j++) {
+		slot_resource(address, rd[j].r_id, 1, res, sizeof(res));
+		if (res[0] == 3 && res[1] == 1 && res[2] == AUX_DIRECTORY) {
+			*id = rd[j].r_id;
+			return(2);
+		}
+	}
+	for(j = 0; ((j < 10) && (rd[j].r_id != RD_EOLIST)); j++) {
+		slot_resource(address, rd[j].r_id, 1, res, sizeof(res));
+		if (res[0] == 3 && res[1] == 1 && res[2] == MACOS_DIRECTORY) {
+			*id = rd[j].r_id;
+			return(1);
+		}
+	}
+	return(0);
+}

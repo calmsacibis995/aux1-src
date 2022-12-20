@@ -1,0 +1,21 @@
+#
+# ditroff DESC file for iw
+#
+fonts 10 R I B BI H HB C CB S1 S
+sizes 9 10 12 14 18 20 24 0
+res 144
+hor 1
+vert 1
+unitwidth 10
+paperlength 1584
+paperwidth 1224
+charset
+!= !m !s $D $J *A *B *C *D *E *F *G *H *I *J *K *L *M *N *O *P *Q *R *S *T 
+*U *W *X *Y *Z *a *b *c *d *e *f *g *h *i *j *k *l *m *n *o *p *q *r *s *t 
+*u *v *w *x *y *z +- -> <- <: <= <> == >: >= A: AE A` Al Ao A~ C, E' I! I? 
+N~ O/ O: OE O~ U: \- \^ \_ \| a' a: a^ a` aa ae al an ao at ax a~ br bt bu 
+bv c, ca cm co cr ct cu d< d> da de dg di e' e: e^ e` el en eq es fa fm ga 
+gr hy i' i: i^ i` ib if im io ip is l< la lb lc lf lh lk lo lq lt m. mi mo 
+mt mu no n~ o' o/ o: o^ o` oe of om o~ pd pl po pp ps pt ql qr r> rb rc rf 
+rg rh rk rn rq rt ru sb sc sd sp sr ss te tf tm ts u' u: u^ u` ua ul y: yi 
+yn ~= 

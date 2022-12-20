@@ -1,0 +1,296 @@
+# this is the makefile to make all things, users and kernel for the icp card
+# kernel objects in the directory that this is invoked from
+
+DEST=	
+BOOTD= $(DEST)/etc/boot.d
+INITD= $(DEST)/etc/init.d
+MASTERD= $(DEST)/etc/master.d
+STARTUPD= $(DEST)/etc/startup.d
+#AT=	/nfs/sys/psn/io/fwd/at
+AT=	/at/at
+LAP=		$(AT)/lap
+DDP=		$(AT)/ddp
+ATP=		$(AT)/atp
+PAP=		$(AT)/pap
+NBP=		$(AT)/nbp
+ECH=		$(AT)/echo
+LIB=		$(AT)/lib
+UTIL=		$(AT)/util
+#FWD=	/nfs/sys/psn/io/fwd/fwd
+FWD=	/at/fwd
+FWDICP=		$(FWD)/fwdicp
+
+
+all:	dirs			\
+	icp_dummy		\
+	fwdicp_fwd.o		\
+	fwdicploop.o		\
+	icplap.o		\
+	fwdddp.o		\
+	$(BOOTD)/fwdicp		\
+	$(INITD)/fwdicp		\
+	$(MASTERD)/fwdicp	\
+	$(STARTUPD)/fwdicp.d/at_load	\
+	$(STARTUPD)/fwdicp	\
+	$(BOOTD)/fwdicp		\
+	$(INITD)/fwdicp		\
+	$(MASTERD)/fwdicp	\
+	$(BOOTD)/fwdicploop	\
+	$(INITD)/fwdicploop	\
+	$(MASTERD)/fwdicploop	\
+	$(BOOTD)/icplap		\
+	$(INITD)/icplap		\
+	$(MASTERD)/icplap	\
+	$(STARTUPD)/icplap	\
+	$(BOOTD)/icpxddp	\
+	$(INITD)/icpxddp	\
+	$(MASTERD)/icpxddp	
+
+
+CFLAGS	=$(DEFS) -O 
+INCLUDE	=/usr/include
+#  make fwd utilities
+#  make appletalk lib and utilities
+#  make the download module for the icp card
+#  NOTE since some sources are  made in the card's environment which are named the
+#	same as the kernel, it is important to make in separate directories
+icp_dummy:
+	make -f $(FWD)/fwdicp/fwdicp.mk DEST=$(DEST) AT=$(AT) FWD=$(FWD) all
+	make -f $(AT)/makefile DEST=$(DEST) AT=$(AT) FWD=$(FWD) CFLAGS="-I$(AT)" all
+	cd $(FWDICP)/environ; make -f $(FWD)/fwdicp/environ/environ.mk DEST=$(DEST) AT=$(AT) FWD=$(FWD) all
+
+MMU=	-DPMMU -DUMVSEG
+DEFS=	-DKERNEL -Uvax -Usun -Dm68k -Dmc68020 -Dmc68881 \
+	-DINET -DSTREAMS -UQUOTA $(LOCAL) \
+	-DSYSCALLS -DPAGING $(MMU) -DNFS
+LOCAL=	-DAUTOCONFIG 	\
+	-DNFSDEBUG 	\
+	-DSCREEN 	\
+	-DDVT 
+#	-DFWDPRINTF
+#	-DDEBUG 	\
+#	-DITRACE 	\
+#	-DHOWFAR
+
+
+#	this generic forwarder should be included with the kernel makefile?!
+fwdicp_fwd.o:	strdebug.o fwd.o fwdicp.o
+	$(LD) -o fwdicp_fwd.o -r strdebug.o fwd.o fwdicp.o
+
+
+strdebug.o:	$(FWD)/streams/strdebug.c
+	$(CC) -I$(INCLUDE) -I$(FWD) $(CFLAGS) -c $(FWD)/streams/strdebug.c
+
+fwd.o:	$(FWD)/fwd.c $(FWD)/fwd.h
+	$(CC) -I$(INCLUDE) -I$(FWD) $(CFLAGS) -c $(FWD)/fwd.c
+
+fwdicp.o:	$(FWDICP)/fwdicplib.c	\
+		$(FWDICP)/fwdicpopen.c	\
+		$(FWD)/fwd.h		\
+		$(FWDICP)/environ/fwdicp.h 
+	$(MAKE) -f $(FWDICP)/fwdicp.mk CC="$(CC)" FIX="$(FIX)" LD="$(LD)" CFLAGS="$(CFLAGS) -I$(INCLUDE) -I$(FWD)" AT=$(AT) DEST=$(DEST) FWD=$(FWD) fwdicp.o
+
+fwdicploop.o:	$(FWDICP)/fwdicploop.c	\
+		$(FWD)/fwd.h		\
+		$(FWDICP)/environ/fwdicp.h 
+	$(MAKE) -f $(FWDICP)/fwdicp.mk CC="$(CC)" FIX="$(FIX)" LD="$(LD)" CFLAGS="$(CFLAGS) -I$(INCLUDE) -I$(FWD)" AT=$(AT) DEST=$(DEST) FWD=$(FWD) fwdicploop.o
+
+fwdddp.o:		$(DDP)/fwdddp.c		\
+			$(FWD)/fwd.h		\
+			$(FWDICP)/environ/fwdicp.h 
+	$(MAKE) -f $(FWDICP)/fwdicp.mk CC="$(CC)" FIX="$(FIX)" LD="$(LD)" CFLAGS="$(CFLAGS) -I$(INCLUDE) -I$(FWD)" AT=$(AT) DEST=$(DEST) FWD=$(FWD) fwdddp.o
+
+icplap.o:		$(LAP)/icplap.c		\
+			$(FWD)/fwd.h		\
+			$(FWDICP)/environ/fwdicp.h 
+	$(MAKE) -f $(FWDICP)/fwdicp.mk CC="$(CC)" FIX="$(FIX)" LD="$(LD)" CFLAGS="$(CFLAGS) -I$(INCLUDE) -I$(FWD)" AT=$(AT) DEST=$(DEST) FWD=$(FWD) icplap.o
+
+fwdicptt.o:	$(FWDICP)/fwdicptt.c	\
+		$(FWD)/fwd.h		\
+		$(FWDICP)/environ/fwdicp.h 
+	$(MAKE) -f $(FWDICP)/fwdicp.mk CC="$(CC)" FIX="$(FIX)" LD="$(LD)" CFLAGS="$(CFLAGS) -I$(INCLUDE) -I$(FWD)" AT=$(AT) DEST=$(DEST) FWD=$(FWD) fwdicptt.o
+
+fwdicpddl.o:	$(FWDICP)/fwdicpddl.c	\
+		$(FWD)/fwd.h		\
+		$(FWDICP)/environ/fwdicp.h 
+	$(MAKE) -f $(FWDICP)/fwdicp.mk CC="$(CC)" FIX="$(FIX)" LD="$(LD)" CFLAGS="$(CFLAGS) -I$(INCLUDE) -I$(FWD)" AT=$(AT) DEST=$(DEST) FWD=$(FWD) fwdicpddl.o
+
+fwdicpploop.o:	$(FWDICP)/fwdicpploop.c	\
+		$(FWD)/fwd.h		\
+		$(FWDICP)/environ/fwdicp.h 
+	$(MAKE) -f $(FWDICP)/fwdicp.mk CC="$(CC)" FIX="$(FIX)" LD="$(LD)" CFLAGS="$(CFLAGS) -I$(INCLUDE) -I$(FWD)" AT=$(AT) DEST=$(DEST) FWD=$(FWD) fwdicpploop.o
+
+
+$(MASTERD)/fwdicp: $(FWDICP)/etc/master.d/fwdicp
+	cp $(FWDICP)/etc/master.d/fwdicp $(MASTERD)/fwdicp
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(INITD)/fwdicp: $(FWDICP)/etc/init.d/fwdicp
+	cp $(FWDICP)/etc/init.d/fwdicp $(INITD)/fwdicp
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(BOOTD)/fwdicp: fwdicp_fwd.o
+	cp fwdicp_fwd.o $(BOOTD)/fwdicp
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(STARTUPD)/fwdicp: $(FWDICP)/etc/startup.d/fwdicp
+	cp $(FWDICP)/etc/startup.d/fwdicp $(STARTUPD)/fwdicp
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+
+$(MASTERD)/fwdicploop: $(FWDICP)/etc/master.d/fwdicploop
+	cp $(FWDICP)/etc/master.d/fwdicploop $(MASTERD)/fwdicploop
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(INITD)/fwdicploop: $(FWDICP)/etc/init.d/fwdicploop
+	cp $(FWDICP)/etc/init.d/fwdicploop $(INITD)/fwdicploop
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(BOOTD)/fwdicploop: fwdicploop.o
+	cp fwdicploop.o $(BOOTD)/fwdicploop
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+
+$(BOOTD)/fwdicpploop: fwdicpploop.o
+	cp fwdicpploop.o $(BOOTD)/fwdploop
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(BOOTD)/fwdtt: fwdicptt.o
+	cp fwdicptt.o $(BOOTD)/fwdtt
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(BOOTD)/fwdddl: fwdicpddl.o
+	cp fwdicpddl.o $(BOOTD)/fwdddl
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+
+$(MASTERD)/icplap: $(AT)/etc/master.d/icplap
+	cp $(AT)/etc/master.d/icplap $(MASTERD)/icplap
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(INITD)/icplap: $(AT)/etc/init.d/icplap
+	cp $(AT)/etc/init.d/icplap $(INITD)/icplap
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(STARTUPD)/icplap: $(AT)/etc/startup.d/icplap
+	cp $(AT)/etc/startup.d/icplap $(STARTUPD)/icplap
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(BOOTD)/icplap: icplap.o
+	cp icplap.o $(BOOTD)/icplap
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+
+$(MASTERD)/icpxddp: $(AT)/etc/master.d/fwdddp
+	cp $(AT)/etc/master.d/fwdddp $(MASTERD)/icpxddp
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(INITD)/icpxddp: $(AT)/etc/init.d/fwdddp
+	cp $(AT)/etc/init.d/fwdddp $(INITD)/icpxddp
+	chown bin $@
+	chgrp bin $@
+	-chmod 755 $@
+
+$(BOOTD)/icpxddp: fwdddp.o
+	cp fwdddp.o $(BOOTD)/icpxddp
+	chown bin $@
+	chgrp bin $@
+	chmod 755 $@
+
+$(STARTUPD)/fwdicp.d/at_load: $(FWD)/fwdicp/environ/at_load
+	cp $(FWD)/fwdicp/environ/at_load $@
+	chown bin $@
+	chgrp bin $@
+	chmod 440 $@
+
+dirs:	$(DEST)/etc
+dirs:	$(DEST)/etc/init.d
+dirs:	$(DEST)/etc/master.d
+dirs:	$(DEST)/etc/boot.d
+dirs:	$(DEST)/etc/startup.d
+dirs:	$(DEST)/etc/startup.d/fwdicp.d
+dirs:	$(DEST)/usr
+dirs:	$(DEST)/usr/lib
+dirs:	$(DEST)/usr/bin
+dirs:	$(DEST)/usr/include
+
+$(DEST)/etc:
+	-mkdir $@
+	-chown bin $@
+	-chgrp bin $@
+	-chmod 775 $@
+$(DEST)/etc/init.d:
+	-mkdir $@
+	-chown bin $@
+	-chgrp bin $@
+	-chmod 775 $@
+$(DEST)/etc/master.d:
+	-mkdir $@
+	-chown bin $@
+	-chgrp bin $@
+	-chmod 775 $@
+$(DEST)/etc/boot.d:
+	-mkdir $@
+	-chown bin $@
+	-chgrp bin $@
+	-chmod 775 $@
+$(DEST)/etc/startup.d:
+	-mkdir $@
+	-chown bin $@
+	-chgrp bin $@
+	-chmod 775 $@
+$(DEST)/etc/startup.d/fwdicp.d:
+	-mkdir $@
+	-chown bin $@
+	-chgrp bin $@
+	-chmod 775 $@
+$(DEST)/usr:
+	-mkdir $@
+	-chown bin $@
+	-chgrp bin $@
+	-chmod 775 $@
+$(DEST)/usr/lib:
+	-mkdir $@
+	-chown bin $@
+	-chgrp bin $@
+	-chmod 775 $@
+$(DEST)/usr/bin:
+	-mkdir $@
+	-chown bin $@
+	-chgrp bin $@
+	-chmod 775 $@
+$(DEST)/usr/include:
+	-mkdir $@
+	-chown bin $@
+	-chgrp bin $@
+	-chmod 775 $@

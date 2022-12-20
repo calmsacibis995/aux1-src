@@ -1,0 +1,12 @@
+.
+./lib
+./lib/troff.font
+./lib/ditroff.font
+./sh
+./src
+./etc
+./doc
+./man
+./test
+./goodies
+./cookbook

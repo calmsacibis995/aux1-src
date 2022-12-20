@@ -1,0 +1,39 @@
+I=
+while test -n "$1"
+do
+	case $1 in
+	-M)  	shift;
+#		dev_kill $1 /dev /dev/*
+		mknod	/dev/appletalk$I/socket c 12 $1
+		chown bin /dev/appletalk$I/socket
+		chgrp bin /dev/appletalk$I/socket
+		chmod 666 /dev/appletalk$I/socket
+		for j in 1 2 3 4 5 6 7 8 9 120 121 122 123 124 125 126 127
+		do
+			mknod /dev/appletalk$I/socket$j c $1 $j 
+			chown bin /dev/appletalk$I/socket$j
+			chgrp bin /dev/appletalk$I/socket$j
+			chmod 660 /dev/appletalk$I/socket$j
+		done 
+		for k in 1 2 3 4 5 6 7 8 9 10 11
+		do
+			for j in 1 2 3 4 5 6 7 8 9
+			do
+				mknod /dev/appletalk$I/socket$k$j c $1 $k$j 
+				chown bin /dev/appletalk$I/socket$k$j
+				chgrp bin /dev/appletalk$I/socket$k$j
+				chmod 660 /dev/appletalk$I/socket$k$j
+			done
+		done 
+		case $I in
+			2)	I=3;;
+			3)	I=4;;
+			4)	I=5;;
+			5)	I=6;;
+			*)	I=2;;
+		esac
+		;;
+	*)	;;
+	esac
+	shift
+done

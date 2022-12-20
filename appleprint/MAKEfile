@@ -1,0 +1,32 @@
+#
+# 	@(#)Copyright Apple Computer 1987	Version 1.3 of MAKEfile on 87/06/29 19:45:55 
+#
+#
+#
+# To cause the output to go to a specific directory, use the DEST macro.
+# 	make DEST=/dist
+# will cause a distribution to appear in /dist.
+#
+CPUFAMILY=	m68k
+SHELL=		/bin/sh
+PROCESSOR=	M68020
+
+MAKEFILE=	MAKEfile
+MAKE=		make
+
+SUBDIRS= dwb/text iw transcript
+
+
+all: $(SUBDIRS)
+
+dwb/text: _NOT_HERE_
+	cd $@ ; PROCESSOR=$(PROCESSOR) $(MAKE) -f text.mk install ROOT=$(DEST)
+
+iw: _NOT_HERE_
+	cd $@ ; PROCESSOR=$(PROCESSOR) $(MAKE) install ROOT=$(DEST)
+
+transcript: _NOT_HERE_
+	cd $@ ; PROCESSOR=$(PROCESSOR) $(MAKE) programs ROOT=$(DEST)
+	cd $@ ; PROCESSOR=$(PROCESSOR) $(MAKE) install ROOT=$(DEST)
+
+_NOT_HERE_:
